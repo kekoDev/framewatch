@@ -58,7 +58,7 @@ describe("package metadata", () => {
     expect(PKG.author).toBeTruthy();
     expect(PKG.repository?.url).toContain("github.com");
     expect(PKG.bugs?.url).toContain("github.com");
-    expect(PKG.homepage).toContain("github.com");
+    expect(PKG.homepage).toBe("https://framewatch.keko.dev");
     expect(PKG.keywords).toContain("mcp");
     expect(PKG.keywords.length).toBeGreaterThanOrEqual(5);
   });
