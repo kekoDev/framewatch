@@ -23,7 +23,7 @@ import {
 import { takeSnapshot } from "../engine/snapshot.js";
 import type { RawFrame } from "../types.js";
 import { describeScale, formatCardMeta } from "../utils/format.js";
-import { refSelector } from "../utils/snapshot-rules.js";
+import { REF_SHAPE, refSelector } from "../utils/snapshot-rules.js";
 import { describeAuth, loginFormVisible, resolveStorageState, storageStateField } from "../utils/storage-state.js";
 import { DEFAULT_SNAPSHOT_MAX_CHARS, VUE_DETECT_MS, VUE_READY_TIMEOUT_MS } from "../constants.js";
 import { hmrFor } from "../engine/hmr.js";
@@ -41,7 +41,7 @@ export const interactInputShape = {
   ...interactionFieldShape,
   ref: z
     .string()
-    .regex(/^e\d+$/, "a ref looks like `e8` — take one from framewatch_snapshot")
+    .regex(REF_SHAPE, "a ref looks like `e8` (or `f1e8`) — take one from framewatch_snapshot")
     .optional()
     .describe("Element ref from framewatch_snapshot (e.g. `e8`) to act on, instead of a `selector`"),
   url: z

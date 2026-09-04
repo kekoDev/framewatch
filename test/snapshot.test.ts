@@ -187,3 +187,19 @@ describe("snapshotPage — Vue", () => {
     expect(text).toContain("  App\n    LoginForm\n      BaseInput ×2");
   });
 });
+
+describe("snapshotPage — after the session page has navigated", () => {
+  it("still names every element, and interact still accepts the ref", async () => {
+    await snapshotPage({ url: `${fixtures.url}/basic.html`, viewport: VIEWPORT });
+    const second = await snapshotPage({ url: PAGE(), viewport: VIEWPORT, mode: "interactive" });
+    const [text] = texts(second);
+    expect(text).toMatch(/— \d+ elements, 7 interactive/);
+    const ref = /button "Sign in" \[ref=([a-z0-9]+)\]/.exec(text)![1];
+    expect(ref).toMatch(/^f\d+e\d+$/);
+
+    const clicked = await performInteraction({ action: "click", ref, wait_ms: 100 });
+    expect(clicked.isError).toBeFalsy();
+    expect(texts(clicked)[0]).toContain(`click ${ref}`);
+    expect(texts(await snapshotPage({ mode: "interactive" }))[0]).toContain('button "Continue"');
+  });
+});

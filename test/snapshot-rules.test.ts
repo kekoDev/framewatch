@@ -82,3 +82,21 @@ describe("refs", () => {
     expect(refSelector("e8")).toBe("aria-ref=e8");
   });
 });
+
+describe("refs after a navigation", () => {
+  // Once the page has had more than one document, Playwright prefixes refs
+  // with the frame ordinal: `f1e3`. They are refs all the same.
+  const TREE_F1 = ['- generic [ref=f1e1]:', '  - button "Go" [ref=f1e2]', "  - paragraph [ref=f1e3]: text"].join("\n");
+
+  it("counts and filters prefixed refs like plain ones", () => {
+    expect(countSnapshot(TREE_F1)).toEqual({ elements: 3, interactive: 1 });
+    expect(interactiveOnly(TREE_F1)).toBe('- button "Go" [ref=f1e2]');
+  });
+
+  it("recognises a prefixed ref and resolves it", () => {
+    expect(isRef("f1e2")).toBe(true);
+    expect(isRef("f12e34")).toBe(true);
+    expect(isRef("fe2")).toBe(false);
+    expect(refSelector("f1e2")).toBe("aria-ref=f1e2");
+  });
+});

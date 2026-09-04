@@ -364,3 +364,10 @@ describe("performInteraction — login hint", () => {
     expect(textBlocks(plain)[0].text).not.toContain("framewatch_save_auth");
   });
 });
+
+describe("interactInputSchema — prefixed refs", () => {
+  it("accepts the frame-prefixed form a navigated page hands out", () => {
+    expect(interactInputSchema.safeParse({ action: "click", ref: "f1e8" }).success).toBe(true);
+    expect(interactInputSchema.safeParse({ action: "click", ref: "fe8" }).success).toBe(false);
+  });
+});

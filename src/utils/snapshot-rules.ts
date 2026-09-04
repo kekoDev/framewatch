@@ -29,13 +29,20 @@ const INTERACTIVE_ROLES = new Set([
   "treeitem",
 ]);
 
-const REF_PATTERN = /\[ref=(e\d+)\]/;
+/**
+ * `[ref=e8]` on a page's first document; `[ref=f1e8]` once the page has
+ * navigated, Playwright prefixing the frame ordinal. Both are refs.
+ */
+const REF_PATTERN = /\[ref=((?:f\d+)?e\d+)\]/;
 const LINE_PATTERN = /^(\s*)- (\S+)(.*)$/;
 
-/** A bare ref as the caller writes it: `e8`. */
+/** A bare ref as the caller writes it: `e8`, or `f1e8` after a navigation. */
 export function isRef(value: string): boolean {
-  return /^e\d+$/.test(value);
+  return REF_SHAPE.test(value);
 }
+
+/** The shape of a ref, for input validation as well as `isRef`. */
+export const REF_SHAPE = /^(?:f\d+)?e\d+$/;
 
 /** The Playwright selector that resolves a snapshot ref. */
 export function refSelector(ref: string): string {
