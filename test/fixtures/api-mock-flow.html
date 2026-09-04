@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Load more</title>
+    <style>
+      body { margin: 0; font: 16px/1.5 system-ui, sans-serif; background: #101820; color: #fff; }
+      main { min-height: 100vh; padding: 48px; box-sizing: border-box; }
+      button { font-size: 28px; padding: 16px 32px; }
+      #log { font-size: 26px; margin-top: 32px; }
+      .ok { color: #6ee7a8; }
+      .bad { color: #ff8080; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Page 0</h1>
+      <button id="load">Load more</button>
+      <div id="log"></div>
+    </main>
+    <script>
+      // A page that fetches only when asked to: one request per click, each to
+      // its own URL. That is what `times` needs to be visible — the first click
+      // gets the mock, the rest fall through to whatever is behind it.
+      const log = document.getElementById("log");
+      let page = 0;
+
+      document.getElementById("load").addEventListener("click", async () => {
+        page += 1;
+        const n = page;
+        document.querySelector("h1").textContent = "Page " + n;
+        try {
+          const res = await fetch("/api/products?page=" + n);
+          if (!res.ok) {
+            log.innerHTML += '<div class="bad">page ' + n + ": failed HTTP " + res.status + "</div>";
+            console.error("page " + n + ": failed HTTP " + res.status);
+            return;
+          }
+          const data = await res.json();
+          const items = Array.isArray(data) ? data : (data.items ?? []);
+          log.innerHTML += '<div class="ok">page ' + n + ": ok " + items.length + "</div>";
+          console.log("page " + n + ": ok " + items.length);
+        } catch (err) {
+          log.innerHTML += '<div class="bad">page ' + n + ": failed</div>";
+          console.error("page " + n + ": failed " + ((err && err.name) || "error"));
+        }
+      });
+    </script>
+  </body>
+</html>

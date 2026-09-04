@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Highlight Fixture</title>
+    <style>
+      html { background: #ffffff; }
+      /* A positioned body with a margin of its own: an overlay laid out in
+         plain document coordinates lands 40px out on a page like this, which
+         is why the container measures itself before drawing anything. */
+      body { position: relative; margin: 40px; padding: 0; font: 14px/1.5 system-ui, sans-serif; height: 1500px; }
+      #target { position: absolute; left: 60px; top: 120px; width: 180px; height: 44px; background: #1e90ff; }
+      #below { position: absolute; left: 60px; top: 1200px; width: 180px; height: 44px; background: #2e7d32; }
+      .row { position: absolute; left: 300px; width: 120px; height: 30px; background: #cccccc; }
+      #sizeless { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="target">in view</div>
+    <div id="below">below the fold</div>
+    <div class="row" style="top: 120px">first</div>
+    <div class="row" style="top: 160px">second</div>
+    <div id="sizeless"></div>
+  </body>
+</html>

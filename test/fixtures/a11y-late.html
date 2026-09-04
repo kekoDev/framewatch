@@ -1,0 +1,25 @@
+<!doctype html>
+<!-- Clean at load, broken 400ms later — an SPA that renders after its first
+     paint. An audit that does not wait finds nothing wrong with it. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Late-rendering fixture</title>
+    <style>body { background: #ffffff; font: 16px system-ui, sans-serif; color: #111111; }</style>
+  </head>
+  <body>
+    <main>
+      <h1>Gallery</h1>
+      <div id="gallery"></div>
+    </main>
+    <script>
+      // Three images, no alt between them: one rule, three offending elements,
+      // which is what `max_elements` has to truncate.
+      const PIXEL = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+      const IMG = '<img src="' + PIXEL + '" width="8" height="8">';
+      setTimeout(() => {
+        document.getElementById("gallery").innerHTML = IMG + IMG + IMG;
+      }, 400);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Restless Fixture</title>
+    <style>
+      html { background: #ffffff; }
+      body { margin: 0; padding: 24px; font: 14px/1.5 system-ui, sans-serif; color: #111111; }
+      button { font: inherit; padding: 6px 14px; margin: 0 8px 8px 0; border: 1px solid #888888; background: #f2f2f2; }
+      #clock { font: 13px monospace; color: #666666; margin: 0 0 12px; }
+      #added { margin: 8px 0; padding: 8px; background: #2e7d32; color: #ffffff; }
+    </style>
+  </head>
+  <body>
+    <!-- A page that is never still: it rewrites text and talks to the server
+         on a timer, with nobody touching it. Every click made here happens
+         against that background, which is what the dead-click sweep has to
+         subtract before it can call anything dead. -->
+    <div id="clock">starting…</div>
+
+    <button id="noisy-dead" type="button">Save draft</button>
+    <button id="noisy-alive" type="button">Show a banner</button>
+
+    <script>
+      const clock = document.getElementById("clock");
+      setInterval(() => {
+        clock.textContent = "tick " + Date.now();
+      }, 100);
+      setInterval(() => {
+        fetch("/api/ok").catch(() => {});
+      }, 200);
+
+      document.getElementById("noisy-alive").addEventListener("click", () => {
+        if (document.getElementById("added")) return;
+        const banner = document.createElement("div");
+        banner.id = "added";
+        banner.textContent = "banner";
+        document.body.appendChild(banner);
+      });
+    </script>
+  </body>
+</html>

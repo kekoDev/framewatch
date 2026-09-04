@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Login Fixture</title>
+    <style>
+      html { background: #ffffff; }
+      body { margin: 0; font: 14px/1.4 system-ui, sans-serif; color: #111111; }
+      /* Fixed sizes everywhere: change-region bounding boxes have to be assertable. */
+      #login { position: absolute; left: 40px; top: 40px; width: 320px; }
+      #login label { display: block; margin: 0 0 4px; }
+      #login input { display: block; box-sizing: border-box; width: 320px; height: 32px; margin: 0 0 16px; padding: 0 8px; border: 1px solid #999999; }
+      #submit { width: 320px; height: 40px; border: 0; background: #1e90ff; color: #ffffff; font: inherit; }
+      #submit:disabled { background: #9dc9f5; }
+      /* Inserted above the form, so a failed login also shifts the layout —
+         that is the layout shift the performance layer should report. */
+      #error { display: none; width: 320px; box-sizing: border-box; margin: 0 0 16px; padding: 8px; background: #c62828; color: #ffffff; }
+      #error.on { display: block; }
+      #spinner { display: none; position: absolute; left: 372px; top: 168px; width: 24px; height: 24px; background: #1e90ff; }
+      #spinner.on { display: block; animation: spin 600ms linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      /* The success state: a big solid panel, faded in over a known 400ms. */
+      #welcome { position: absolute; left: 40px; top: 40px; width: 320px; height: 200px; background: #2e7d32; color: #ffffff; padding: 16px; box-sizing: border-box; opacity: 0; transition: opacity 400ms linear; pointer-events: none; }
+      #welcome.on { opacity: 1; }
+    </style>
+  </head>
+  <body>
+    <form id="login" novalidate>
+      <div id="error" role="alert"></div>
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="username" />
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" />
+      <button id="submit" type="submit">Sign in</button>
+    </form>
+    <div id="spinner"></div>
+    <div id="welcome" hidden><h1>Signed in</h1><p>Welcome back.</p></div>
+
+    <script>
+      // Every outcome is logged to window.__events too, so engine tests can
+      // assert on what the page did and not only on what it looks like.
+      const log = (window.__events = []);
+      const $ = (id) => document.getElementById(id);
+      const form = $("login");
+
+      const fail = (message) => {
+        $("error").textContent = message;
+        $("error").classList.add("on");
+        console.error("login failed: " + message);
+        log.push("fail:" + message);
+      };
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        $("error").classList.remove("on");
+
+        // Client-side validation: this path never touches the network, so a
+        // capture of it shows a console error and no network events at all.
+        if (!$("email").value || !$("password").value) {
+          fail("Email and password are required");
+          return;
+        }
+
+        $("submit").disabled = true;
+        $("spinner").classList.add("on");
+        log.push("submit:" + $("email").value);
+
+        let status = 0;
+        try {
+          const response = await fetch("/api/login", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ email: $("email").value, password: $("password").value }),
+          });
+          status = response.status;
+        } catch (error) {
+          status = 0;
+        }
+
+        $("spinner").classList.remove("on");
+        $("submit").disabled = false;
+
+        if (status === 200) {
+          console.info("auth token stored");
+          log.push("success");
+          form.style.display = "none";
+          $("welcome").hidden = false;
+          // Next frame, so the transition has a start value to animate from.
+          requestAnimationFrame(() => $("welcome").classList.add("on"));
+          return;
+        }
+        fail(status === 401 ? "Invalid email or password" : "Sign-in failed (" + status + ")");
+      });
+    </script>
+  </body>
+</html>

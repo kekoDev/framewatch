@@ -1,0 +1,76 @@
+{
+  "name": "framewatch-mcp-server",
+  "version": "0.2.0",
+  "description": "MCP server for smart visual testing of web apps — frame capture, diffing, and interaction replay",
+  "license": "MIT",
+  "author": "kekoDev (https://github.com/kekoDev)",
+  "homepage": "https://github.com/kekoDev/framewatch#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kekoDev/framewatch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kekoDev/framewatch/issues"
+  },
+  "type": "module",
+  "bin": {
+    "framewatch-mcp-server": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run build",
+    "pretest": "npm run build && npm run typecheck",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "axe-core": "^4.10.0",
+    "playwright": "^1.62.0",
+    "sharp": "^0.35.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^4.1.0",
+    "typescript": "^5.9.0",
+    "vitest": "^4.1.0",
+    "vue": "^3.5.42",
+    "vue-router": "^4.6.4"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "visual-testing",
+    "visual-regression",
+    "screenshot",
+    "playwright",
+    "chromium",
+    "claude-code",
+    "ai-testing",
+    "accessibility",
+    "axe-core",
+    "diff"
+  ]
+}

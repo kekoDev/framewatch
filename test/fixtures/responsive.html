@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Responsive fixture</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { background: #ffffff; font: 16px/1.4 system-ui, sans-serif; }
+      /* Always 600px wide: fits from tablet up, sticks out on a phone. */
+      #wide { width: 600px; height: 120px; background: #2244cc; color: #fff; }
+      #label { padding: 12px; }
+      #label::after { content: "narrow"; }
+      @media (min-width: 700px) { body { background: #ffeecc; } #label::after { content: "wide"; } }
+      .desktop-only { display: none; }
+      @media (min-width: 1000px) { .desktop-only { display: block; background: #114411; height: 60px; } }
+    </style>
+  </head>
+  <body>
+    <div id="wide"></div>
+    <div id="label"></div>
+    <div class="desktop-only">desktop only</div>
+  </body>
+</html>

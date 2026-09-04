@@ -1,0 +1,10 @@
+# Fixture robots.txt, served for every fixture page on this origin.
+User-agent: *
+Disallow: /seo-blocked.html
+Disallow: /private/
+
+User-agent: Googlebot
+Disallow: /seo-blocked.html
+Allow: /private/briefing.html
+
+Sitemap: {{BASE}}/sitemap.xml

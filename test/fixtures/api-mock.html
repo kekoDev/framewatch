@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Products</title>
+    <style>
+      /* Each state paints the whole viewport a different colour, so the grid
+         differ keeps a frame for every one of them without tuning sensitivity. */
+      body { margin: 0; font: 16px/1.5 system-ui, sans-serif; }
+      #state { min-height: 100vh; padding: 48px; box-sizing: border-box; }
+      #state.loading { background: #e8e8e8; color: #555; }
+      #state.ready   { background: #0b6b3a; color: #fff; }
+      #state.empty   { background: #7a5c00; color: #fff; }
+      #state.error   { background: #8b1a1a; color: #fff; }
+      h1 { font-size: 48px; margin: 0 0 24px; }
+      li { font-size: 28px; }
+      #detail { font-size: 24px; opacity: 0.85; }
+    </style>
+  </head>
+  <body>
+    <div id="state" class="loading">
+      <h1 id="title">Loading…</h1>
+      <ul id="list"></ul>
+      <p id="detail"></p>
+    </div>
+    <script>
+      // Every state is announced on the console as well as painted. The console
+      // layer is on by default, so a test (and a person reading the diff cards)
+      // can tell an empty list from a failed request without reading pixels.
+      const box = document.getElementById("state");
+      const title = document.getElementById("title");
+      const list = document.getElementById("list");
+      const detail = document.getElementById("detail");
+
+      function show(state, heading, items, note) {
+        box.className = state;
+        title.textContent = heading;
+        list.innerHTML = "";
+        for (const item of items) {
+          const li = document.createElement("li");
+          li.textContent = item.name ?? String(item);
+          list.appendChild(li);
+        }
+        detail.textContent = note;
+      }
+
+      async function load() {
+        show("loading", "Loading…", [], "");
+        console.log("products: loading");
+        try {
+          const res = await fetch("/api/products");
+          if (!res.ok) {
+            show("error", "Something went wrong", [], "HTTP " + res.status);
+            console.error("products: error HTTP " + res.status);
+            return;
+          }
+          // Deliberately res.json(): a body that is not JSON has to throw here,
+          // which is exactly what the malformed scenario is testing for.
+          const data = await res.json();
+          const items = Array.isArray(data) ? data : (data.items ?? []);
+          if (items.length === 0) {
+            show("empty", "No products yet", [], "Add your first product to get started.");
+            console.log("products: empty");
+            return;
+          }
+          show("ready", "Products", items, items.length + " items");
+          console.log("products: ready " + items.length);
+        } catch (err) {
+          show("error", "Something went wrong", [], String((err && err.message) || err));
+          console.error("products: error " + ((err && err.name) || "failed"));
+        }
+      }
+
+      load();
+    </script>
+  </body>
+</html>

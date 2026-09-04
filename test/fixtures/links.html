@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Links Fixture</title>
+    <!-- A stylesheet that is not there. The browser requests this one itself. -->
+    <link rel="stylesheet" href="/missing.css" />
+    <link rel="icon" href="/api/image?w=32&h=32" />
+    <style>
+      body { font: 14px system-ui; margin: 0; padding: 24px; background: #fff; color: #111; }
+      a { display: block; margin: 2px 0; }
+      h2 { margin-top: 28px; }
+    </style>
+  </head>
+  <body>
+    <h1 id="top-heading">Every kind of link</h1>
+
+    <h2>Links that work</h2>
+    <a id="ok-relative" href="basic.html">A page that exists</a>
+    <a id="ok-absolute" href="{{BASE}}/seo-good.html">The same site, spelled out in full</a>
+    <a id="ok-query" href="/api/status?code=200">A 200 with a query string</a>
+    <!-- 405 to a HEAD, 200 to a GET: a HEAD-only checker calls this broken. -->
+    <a id="ok-nohead" href="/api/nohead">A server that refuses HEAD</a>
+
+    <h2>Links that do not</h2>
+    <a id="broken-404" href="missing-page.html">A page that is not there</a>
+    <a id="broken-500" href="/api/status?code=500">A page that errors</a>
+    <a id="broken-redirect" href="/api/redirect?to=%2Fmissing-page.html">A redirect to nowhere</a>
+
+    <h2>Links that go somewhere else first</h2>
+    <a id="redirect-one" href="/api/redirect?to=%2Fbasic.html">One hop</a>
+    <a id="redirect-chain" href="/api/redirect?to=%2Fbasic.html&amp;hops=2">Three hops</a>
+    <a id="redirect-loop" href="/api/loop">Round and round</a>
+
+    <h2>Links the server will not answer</h2>
+    <a id="blocked-401" href="/api/status?code=401">Behind a login</a>
+    <a id="blocked-403" href="/api/status?code=403">Refused</a>
+    <a id="slow" href="/api/pending">Never answers</a>
+
+    <h2>Links that are not requests</h2>
+    <a id="mail" href="mailto:hi@example.com">Mail us</a>
+    <a id="mail-empty" href="mailto:">Mail nobody</a>
+    <a id="phone" href="tel:+15551234567">Call us</a>
+    <a id="script" href="javascript:void(0)">Runs a script</a>
+    <a id="scheme" href="ftp://files.example.com/manual.pdf">Over FTP</a>
+    <a id="malformed" href="http://">Not a URL at all</a>
+    <a id="empty" href="">Nothing at all</a>
+
+    <h2 id="section-two">Links into this page</h2>
+    <a id="frag-ok" href="#section-two">To a heading that exists</a>
+    <a id="frag-named" href="#old-anchor">To an old-style anchor</a>
+    <a id="frag-missing" href="#does-not-exist">To nothing</a>
+    <a id="frag-top" href="#top">To the top</a>
+    <a id="frag-hash" href="#">To the top, the lazy way</a>
+    <a name="old-anchor"></a>
+
+    <h2>Somewhere else entirely</h2>
+    <!-- A different origin (a port nothing listens on), so `check_external` has something to skip. -->
+    <a id="external" href="http://127.0.0.1:1/offsite">Off site</a>
+
+    <h2>The same link twice</h2>
+    <a id="dup-a" href="basic.html">In the header</a>
+    <a id="dup-b" href="basic.html#somewhere">In the footer, with a fragment</a>
+
+    <h2>Things the page loads</h2>
+    <img id="img-ok" src="/api/image?w=40&amp;h=40" width="40" height="40" alt="A small square" />
+    <img id="img-broken" src="/missing.png" width="10" height="10" alt="Not there" />
+    <img id="img-lazy" src="/api/image?w=20&amp;h=20" width="20" height="20" alt="Below the fold" loading="lazy" />
+    <script id="script-broken" src="/missing.js"></script>
+  </body>
+</html>

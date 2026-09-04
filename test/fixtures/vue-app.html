@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Vue Fixture</title>
+    <style>
+      body { margin: 0; padding: 20px; font: 14px system-ui, sans-serif; }
+      nav a { margin-right: 12px; }
+      .loading { opacity: 0.5; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <!--
+      Query parameters, so one page stands in for many apps:
+        ?prod=1     load the production build — no component data on elements
+        ?delay=N    mount the app N ms after load (a slow SPA)
+        ?hmr=N      N ms after load, change the heading and log Vite's hot-update line
+        ?css=N      N ms after load, log Vite's css hot-update line
+        ?reload=N   N ms after load, log Vite's full-reload line and reload once
+        ?vite=0     do not log "[vite] connected." on load
+    -->
+    <script>
+      (function () {
+        var q = new URLSearchParams(location.search);
+        var prod = q.get("prod") === "1";
+        document.write('<script src="/vendor/' + (prod ? "vue.prod.js" : "vue.js") + '"><\/script>');
+        document.write('<script src="/vendor/vue-router.js"><\/script>');
+      })();
+    </script>
+    <script>
+      (function () {
+        var q = new URLSearchParams(location.search);
+        var num = function (name) { var v = Number(q.get(name)); return Number.isFinite(v) && q.has(name) ? v : null; };
+
+        if (q.get("vite") !== "0") console.debug("[vite] connected.");
+
+        var { createApp, ref, defineComponent } = Vue;
+        var { createRouter, createWebHistory } = VueRouter;
+
+        var BaseInput = defineComponent({
+          name: "BaseInput",
+          props: { label: String, modelValue: String },
+          emits: ["update:modelValue"],
+          template:
+            '<label>{{ label }} <input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" /></label>',
+        });
+
+        var LoginForm = defineComponent({
+          name: "LoginForm",
+          components: { BaseInput },
+          props: { title: String, max: { type: Number, default: 3 } },
+          setup: function () {
+            var email = ref("");
+            var password = ref("");
+            var loading = ref(false);
+            var items = ref([1, 2, 3]);
+            var submit = function () { loading.value = true; };
+            return { email: email, password: password, loading: loading, items: items, submit: submit };
+          },
+          template:
+            '<form id="login" :class="{ loading: loading }">' +
+            '<h1 id="title">{{ title }}</h1>' +
+            '<BaseInput id="email" label="Email" v-model="email" />' +
+            '<BaseInput id="password" label="Password" v-model="password" />' +
+            '<button id="submit" type="button" @click="submit" :disabled="loading">Sign in</button>' +
+            "</form>",
+        });
+
+        var Home = { name: "HomePage", template: '<p id="home">Home</p>' };
+        var Settings = { name: "SettingsPage", template: '<p id="settings">Settings</p>' };
+
+        var router = createRouter({
+          history: createWebHistory(),
+          routes: [
+            { path: "/vue-app.html", name: "home", component: Home },
+            { path: "/vue-app.html/login", name: "login", component: LoginForm, props: { title: "Welcome back" } },
+            { path: "/vue-app.html/settings", name: "settings", component: Settings },
+          ],
+        });
+
+        var app = createApp({
+          name: "App",
+          template:
+            "<nav>" +
+            '<router-link id="to-home" to="/vue-app.html">Home</router-link>' +
+            '<router-link id="to-login" to="/vue-app.html/login">Login</router-link>' +
+            '<router-link id="to-settings" to="/vue-app.html/settings">Settings</router-link>' +
+            "</nav>" +
+            '<h2 id="banner">Version 1</h2>' +
+            "<router-view />",
+        });
+        app.use(router);
+
+        var mount = function () { app.mount("#app"); };
+        var delay = num("delay");
+        if (delay !== null && delay > 0) setTimeout(mount, delay);
+        else mount();
+
+        var hmr = num("hmr");
+        if (hmr !== null) {
+          setTimeout(function () {
+            var banner = document.getElementById("banner");
+            if (banner) banner.textContent = "Version 2";
+            console.debug("[vite] hot updated: /src/App.vue");
+          }, hmr);
+        }
+        var css = num("css");
+        if (css !== null) {
+          setTimeout(function () { console.debug("[vite] css hot updated: /src/App.vue?vue&type=style&index=0&lang.css"); }, css);
+        }
+        var reload = num("reload");
+        if (reload !== null && !sessionStorage.getItem("framewatch_reloaded")) {
+          setTimeout(function () {
+            sessionStorage.setItem("framewatch_reloaded", "1");
+            console.log("[vite] page reload src/main.js");
+            location.reload();
+          }, reload);
+        }
+      })();
+    </script>
+  </body>
+</html>

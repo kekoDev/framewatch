@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>RTL — one fault in every category</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; font: 16px/1.5 system-ui, sans-serif; width: 1280px; }
+
+      /* Every element here is deliberately wrong in exactly one way, so a
+         finding can be attributed to a single cause. The ids say which. */
+
+      /* Pinned with a physical offset: never moves, whatever the direction. */
+      #not-mirrored {
+        position: absolute;
+        left: 40px;
+        top: 20px;
+        width: 200px;
+        height: 60px;
+        background: #cfe3ff;
+      }
+
+      /* Hard-coded physical alignment: `start` would follow the direction. */
+      #stays-left {
+        margin-top: 100px;
+        width: 600px;
+        text-align: left;
+        background: #ffe9c7;
+      }
+
+      /* Reversed twice — RTL flips it again, so the items end up backwards. */
+      #double-reversed {
+        display: flex;
+        flex-direction: row-reverse;
+        width: 600px;
+        background: #e7ffd9;
+      }
+      #double-reversed span { padding: 4px 10px; }
+
+      /* Physical padding that never swaps. */
+      #padding-stuck {
+        padding-left: 48px;
+        padding-right: 0;
+        width: 600px;
+        background: #f0d9ff;
+      }
+
+      /* Pinned to the right edge with a physical offset and wider than the
+         space left for it — in RTL the same pin puts it off the other edge. */
+      #overflows {
+        position: absolute;
+        /* Fits exactly in LTR (900 + 360 = 1260, inside the 1280 viewport).
+           The element is wide and far from the left edge, so it is the
+           mirroring check that fires here rather than the overflow one —
+           see #overflows-rtl for the overflow case. */
+        left: 900px;
+        top: 320px;
+        width: 360px;
+        height: 40px;
+        background: #ffd9d9;
+      }
+
+      /* Fits in LTR and only overflows once the direction flips.
+
+         A right-hand rail: the wrapper is pinned to the right of the viewport
+         with a physical `left: 880px` and is 400px wide, so it occupies
+         880→1280 in BOTH directions (it is the forgotten physical pin). Its
+         child is 700px and is laid out from the wrapper's inline start: in
+         LTR that is x=880, so it runs to 1580 and overflows the right edge by
+         300px. Flipped, the child starts at the wrapper's right edge (1280)
+         and runs leftwards to 580 — comfortably on screen.
+
+         So this element is the mirror image of the usual case: it overflows
+         in LTR and NOT in RTL, which is exactly what must not be reported.
+         `judgeOverflow` only fires on overflow that is new in RTL, and this
+         is the fixture that proves it. */
+      #overflow-ltr-only {
+        position: absolute;
+        left: 880px;
+        top: 370px;
+        width: 400px;
+        white-space: nowrap;
+      }
+      #overflows-ltr {
+        display: inline-block;
+        width: 700px;
+        height: 30px;
+        background: #ffe0e0;
+      }
+
+      /* The mirror of the case above, and the one that IS a finding.
+
+         Same construction, pinned to the LEFT with a physical `left: 0`. In
+         LTR the 700px child runs 0→700, well inside the viewport. Flipped,
+         it is laid out from the wrapper's right edge (400) leftwards to
+         x = -300 — off the left of the screen, cropped, and invisible in the
+         screenshot. Overflow that is new in RTL is the whole point of the
+         check. */
+      #overflow-rtl-only {
+        position: absolute;
+        left: 0;
+        top: 420px;
+        width: 400px;
+        white-space: nowrap;
+        direction: inherit;
+      }
+      #overflows-rtl {
+        display: inline-block;
+        margin-inline-start: 0;
+        width: 700px;
+        height: 30px;
+        background: #ffd0d0;
+      }
+
+      /* A directional icon with no mirroring rule. */
+      #arrow-next {
+        position: absolute;
+        left: 60px;
+        top: 400px;
+        width: 40px;
+        height: 40px;
+        background: #d9d9ff;
+      }
+
+      /* The control group: off-centre, and correctly written with logical
+         properties, so it mirrors on its own and must never be reported. */
+      #good-logical {
+        position: absolute;
+        inset-inline-start: 40px;
+        top: 470px;
+        width: 200px;
+        height: 50px;
+        padding-inline-start: 24px;
+        padding-inline-end: 0;
+        text-align: start;
+        background: #d9ffe9;
+      }
+
+      /* Also correct: centred, so mirroring is a no-op and there is nothing
+         to report even though it never moves. */
+      #centred {
+        margin: 0 auto;
+        margin-top: 560px;
+        width: 300px;
+        text-align: center;
+        background: #eeeeee;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="not-mirrored">Pinned with left: 40px</div>
+
+    <p id="stays-left">This paragraph is aligned with text-align: left rather than start.</p>
+
+    <div id="double-reversed">
+      <span id="first-item">First</span>
+      <span id="second-item">Second</span>
+      <span id="third-item">Third</span>
+    </div>
+
+    <div id="padding-stuck">Padding is physical: 48px on the left in both directions.</div>
+
+    <div id="overflows">Pinned near the right edge</div>
+
+    <div id="overflow-rtl-only">
+      <div id="overflows-rtl">Runs off the left edge once the page is flipped</div>
+    </div>
+
+    <div id="overflow-ltr-only">
+      <div id="overflows-ltr">Overflows in LTR only — must never be reported as an RTL fault</div>
+    </div>
+
+    <div id="arrow-next" class="icon icon-arrow-right" aria-label="Next page">&#8594;</div>
+
+    <div id="good-logical">Written with logical properties</div>
+
+    <div id="centred">Centred, so mirroring changes nothing</div>
+  </body>
+</html>

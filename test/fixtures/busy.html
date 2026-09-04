@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Busy Fixture</title>
+    <style>html, body { margin: 0; background: #ffffff; }</style>
+  </head>
+  <body>
+    <div id="box" style="width:200px;height:200px;background:#c00"></div>
+    <script>
+      // A runaway loop — the exact thing a developer points this tool at.
+      // Chromium cannot answer screenshot or title requests while it runs.
+      setTimeout(() => {
+        const until = Date.now() + 10000;
+        while (Date.now() < until) {}
+      }, 400);
+    </script>
+  </body>
+</html>

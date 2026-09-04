@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>RTL — switched by a class, not by dir</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; font: 16px/1.5 system-ui, sans-serif; width: 1280px; }
+
+      /* This app switches direction on a class, and nothing else.
+       *
+       * `dir="rtl"` on <html> is explicitly cancelled below, which is the
+       * point of the fixture: setting the attribute leaves the page rendering
+       * exactly as it did, every element compares equal, and a tool that did
+       * not check would report a perfectly clean page. Real apps reach the
+       * same state a less deliberate way — a framework that reads its own
+       * store on boot and writes `direction` from it. */
+      html[dir="rtl"]:not(.rtl),
+      html[dir="rtl"]:not(.rtl) body { direction: ltr; }
+
+      html.rtl, html.rtl body { direction: rtl; }
+
+      #pinned {
+        position: absolute;
+        left: 60px;
+        top: 40px;
+        width: 240px;
+        height: 60px;
+        background: #cfe3ff;
+      }
+
+      #copy {
+        margin-top: 140px;
+        width: 600px;
+        text-align: left;
+        background: #ffe9c7;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="pinned">Pinned with a physical left offset</div>
+    <p id="copy">This paragraph is aligned left rather than start, so it never follows the direction.</p>
+  </body>
+</html>

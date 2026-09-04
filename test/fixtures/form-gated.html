@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Gated Form Fixture</title>
+    <style>
+      html { background: #ffffff; }
+      body { margin: 0; font: 14px/1.4 system-ui, sans-serif; color: #111111; }
+      #locked { position: absolute; left: 20px; top: 20px; width: 320px; height: 120px; background: #37474f; color: #ffffff; padding: 16px; box-sizing: border-box; }
+      #profile { position: absolute; left: 20px; top: 20px; width: 360px; padding: 16px; }
+      #profile input { display: block; box-sizing: border-box; width: 320px; margin: 0 0 12px; padding: 6px 8px; border: 1px solid #999999; font: inherit; }
+      #save { height: 34px; border: 0; background: #1e90ff; color: #ffffff; font: inherit; padding: 0 18px; }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <!-- Signed out there is nothing to fill at all, which is what makes the
+         restored-state case provable: a form test that finds fields here got
+         past the gate. Same cookie and token as gate.html. -->
+    <div id="locked" hidden><h1>Members only</h1><p>Sign in to edit your profile.</p></div>
+
+    <form id="profile" hidden>
+      <label for="display-name">Display name</label>
+      <input id="display-name" name="display_name" type="text" required />
+      <label for="tagline">Tagline</label>
+      <input id="tagline" name="tagline" type="text" />
+      <button id="save" type="submit">Save profile</button>
+    </form>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const hasCookie = () => document.cookie.split(";").some((c) => c.trim().startsWith("fw_session="));
+      const token = () => {
+        try {
+          return localStorage.getItem("fw_token");
+        } catch {
+          return null;
+        }
+      };
+
+      const authed = Boolean(token()) && hasCookie();
+      $("locked").hidden = authed;
+      $("profile").hidden = !authed;
+
+      $("profile").addEventListener("submit", (event) => event.preventDefault());
+    </script>
+  </body>
+</html>

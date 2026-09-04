@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Loading…</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      // What a client-rendered app looks like from a crawler's side: an empty
+      // shell in the HTML, and every SEO-relevant thing written afterwards.
+      // Reading the source here would report a page with no description, no
+      // canonical, no h1 and no structured data.
+      setTimeout(function () {
+        document.title = "Keko Food — the menu, rendered by the client";
+
+        var description = document.createElement("meta");
+        description.name = "description";
+        description.content =
+          "Every one of these tags was added by JavaScript after the page loaded, which is how most single-page apps do it.";
+        document.head.appendChild(description);
+
+        var canonical = document.createElement("link");
+        canonical.rel = "canonical";
+        canonical.href = location.origin + "/seo-spa.html";
+        document.head.appendChild(canonical);
+
+        var ld = document.createElement("script");
+        ld.type = "application/ld+json";
+        ld.textContent = JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Keko Food",
+          url: "https://example.com",
+          potentialAction: { "@type": "SearchAction", target: "https://example.com/?q={q}" },
+        });
+        document.head.appendChild(ld);
+
+        document.getElementById("app").innerHTML =
+          "<h1>The menu</h1><h2>Starters</h2><p>Rendered on the client, a moment after load.</p>";
+      }, 400);
+    </script>
+  </body>
+</html>

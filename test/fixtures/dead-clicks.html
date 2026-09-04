@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Dead-Click Fixture</title>
+    <style>
+      html { background: #ffffff; }
+      /* Nothing at 0,0: the hover probe parks the pointer there between reads. */
+      body { margin: 0; padding: 24px; font: 14px/1.5 system-ui, sans-serif; color: #111111; height: 1600px; }
+      h1 { font-size: 18px; margin: 0 0 16px; }
+      section { margin: 0 0 20px; }
+      h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: #666666; margin: 0 0 8px; }
+      button, .fake-btn, a { font: inherit; }
+      button { padding: 6px 14px; margin: 0 8px 8px 0; border: 1px solid #888888; background: #f2f2f2; }
+      a { margin: 0 12px 0 0; }
+      /* A plain <div> announcing itself as a button with nothing but a cursor —
+         the shape a dead click actually takes in a component framework. */
+      .fake-btn { display: inline-block; padding: 6px 14px; margin: 0 8px 8px 0; border: 1px solid #888888; background: #f2f2f2; cursor: pointer; }
+      /* Lights up under the pointer and answers nothing: the worst kind. */
+      #dead-hover { cursor: pointer; }
+      #dead-hover:hover { background: #1e90ff; color: #ffffff; }
+      #panel { display: none; margin: 8px 0; padding: 8px; background: #8b0000; color: #ffffff; }
+      #panel.on { display: block; }
+      #qty { width: 60px; }
+      #bottom { position: absolute; top: 1400px; left: 24px; }
+    </style>
+  </head>
+  <body>
+    <h1>Dead-click fixture</h1>
+
+    <section>
+      <h2>These do something</h2>
+      <button id="alive-dom" type="button">Show panel</button>
+      <button id="alive-net" type="button">Ping the API</button>
+      <button id="alive-store" type="button">Remember me</button>
+      <button id="alive-scroll" type="button">Jump down</button>
+      <button id="alive-field" type="button">Add one</button>
+      <input id="qty" type="number" value="1" />
+      <button id="alive-throw" type="button">Export</button>
+      <button id="danger" type="button">Delete everything</button>
+      <button id="aria-off" type="button" aria-disabled="true">Looks unavailable</button>
+      <div id="panel">panel</div>
+      <a id="alive-link" href="basic.html">Go to another page</a>
+      <a id="alive-anchor" href="#bottom">Jump to the bottom</a>
+    </section>
+
+    <section>
+      <h2>These do nothing at all</h2>
+      <a id="dead-hash" href="#">Pricing</a>
+      <button id="dead-button" type="button">Save draft</button>
+      <div id="dead-div" class="fake-btn">Add to cart</div>
+      <button id="dead-hover" type="button">Subscribe</button>
+    </section>
+
+    <section>
+      <h2>These are never clicked</h2>
+      <a id="external" href="https://example.com/docs">Documentation</a>
+      <a id="mail" href="mailto:hello@example.com">Email us</a>
+      <button id="disabled" type="button" disabled>Publish</button>
+    </section>
+
+    <div id="bottom">the bottom</div>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+
+      // One effect each, so a test can assert on exactly which channel spoke.
+      $("alive-dom").addEventListener("click", () => $("panel").classList.add("on"));
+      $("alive-net").addEventListener("click", () => {
+        fetch("/api/ok").catch(() => {});
+      });
+      $("alive-store").addEventListener("click", () => {
+        try {
+          localStorage.setItem("framewatch-remember", String(Date.now()));
+        } catch {}
+      });
+      $("alive-scroll").addEventListener("click", () => scrollTo(0, 1000));
+      $("alive-field").addEventListener("click", () => {
+        $("qty").value = String(Number($("qty").value || "0") + 1);
+      });
+      $("alive-throw").addEventListener("click", () => {
+        // A handler that runs and falls over: alive, and broken.
+        undefined.rows.forEach(() => {});
+      });
+      $("danger").addEventListener("click", () => {
+        document.title = "everything deleted";
+      });
+      // aria-disabled is a claim, not an effect: this one still works.
+      $("aria-off").addEventListener("click", () => {
+        try {
+          sessionStorage.setItem("framewatch-aria", "1");
+        } catch {}
+      });
+    </script>
+  </body>
+</html>

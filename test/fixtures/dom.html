@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch DOM Fixture</title>
+    <style>
+      html, body { margin: 0; background: #ffffff; }
+      #app { position: absolute; left: 0; top: 0; width: 300px; height: 200px; background: #eeeeee; }
+      .spinner { position: absolute; left: 20px; top: 20px; width: 60px; height: 60px; background: #1e90ff; }
+      .modal { position: absolute; left: 20px; top: 100px; width: 200px; height: 80px; background: #8b0000; }
+    </style>
+  </head>
+  <body>
+    <div id="app"><div class="spinner"></div></div>
+    <p id="label">initial</p>
+    <script>
+      const app = document.getElementById("app");
+      // A structural change, then a removal, then an inline-style animation,
+      // then a text edit — one of each kind the DOM layer reports.
+      setTimeout(() => {
+        const modal = document.createElement("div");
+        modal.className = "modal";
+        modal.textContent = "modal";
+        app.appendChild(modal);
+      }, 300);
+      setTimeout(() => { document.querySelector(".spinner").remove(); }, 600);
+      setTimeout(() => {
+        let step = 0;
+        const timer = setInterval(() => {
+          app.style.opacity = String(1 - step / 20);
+          if (++step > 10) clearInterval(timer);
+        }, 16);
+      }, 900);
+      setTimeout(() => { document.getElementById("label").textContent = "changed"; }, 1300);
+    </script>
+  </body>
+</html>

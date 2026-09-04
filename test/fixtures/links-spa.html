@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Links Fixture — rendered after load</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      // Nothing in the HTML source is a link. Everything below is, which is
+      // what a component framework ships.
+      setTimeout(() => {
+        document.getElementById("app").innerHTML =
+          '<a id="rendered-ok" href="basic.html">Rendered, and it works</a>' +
+          '<a id="rendered-broken" href="rendered-missing.html">Rendered, and it does not</a>';
+      }, 150);
+    </script>
+  </body>
+</html>

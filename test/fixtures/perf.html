@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Performance Fixture</title>
+    <style>
+      html, body { margin: 0; background: #ffffff; font: 16px monospace; }
+      #hero { width: 380px; height: 180px; background: #1e3a8a; color: #ffffff; }
+      #banner { width: 380px; height: 90px; background: #ff8c00; }
+    </style>
+  </head>
+  <body>
+    <div id="hero">largest contentful element</div>
+    <p id="body-copy">some copy underneath the hero</p>
+    <script>
+      // A banner inserted above the content after first paint pushes everything
+      // down: a layout shift with a score well above the noise floor.
+      setTimeout(() => {
+        const banner = document.createElement("div");
+        banner.id = "banner";
+        document.body.insertBefore(banner, document.body.firstChild);
+      }, 600);
+    </script>
+  </body>
+</html>

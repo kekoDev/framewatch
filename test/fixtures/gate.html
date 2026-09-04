@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Gate Fixture</title>
+    <style>
+      html { background: #ffffff; }
+      body { margin: 0; font: 14px/1.4 system-ui, sans-serif; color: #111111; }
+      /* Two solid, fixed panels: which one is on screen is legible in a diff. */
+      #gate { position: absolute; left: 20px; top: 20px; width: 300px; height: 160px; background: #37474f; color: #ffffff; padding: 16px; box-sizing: border-box; }
+      #gate input { display: block; width: 268px; height: 32px; margin: 8px 0; box-sizing: border-box; }
+      #gate .go { width: 268px; height: 36px; border: 0; background: #1e90ff; color: #ffffff; font: inherit; }
+      #error { display: none; margin-top: 8px; color: #ffcdd2; }
+      #error.on { display: block; }
+      .feed { position: absolute; left: 20px; top: 20px; width: 300px; height: 160px; background: #2e7d32; color: #ffffff; padding: 16px; box-sizing: border-box; }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <!-- The gate. Passing it stores BOTH a cookie and a localStorage token, so a
+         restored storage state has to carry both halves for the feed to appear. -->
+    <div id="gate" hidden>
+      <form id="form">
+        <label for="pass">Password</label>
+        <input id="pass" name="pass" type="password" autocomplete="current-password" />
+        <button class="go" type="submit">Enter</button>
+      </form>
+      <div id="error" role="alert"></div>
+    </div>
+
+    <div id="feed" class="feed" hidden><h1>Feed</h1><p id="who"></p></div>
+
+    <script>
+      const log = (window.__events = []);
+      const $ = (id) => document.getElementById(id);
+
+      const TOKEN_KEY = "fw_token";
+      const COOKIE = "fw_session";
+      const PASSWORD = "letmein";
+
+      const hasCookie = () =>
+        document.cookie.split(";").some((c) => c.trim().startsWith(COOKIE + "="));
+
+      const token = () => {
+        try {
+          return localStorage.getItem(TOKEN_KEY);
+        } catch {
+          return null;
+        }
+      };
+
+      const render = () => {
+        const authed = Boolean(token()) && hasCookie();
+        $("gate").hidden = authed;
+        $("feed").hidden = !authed;
+        if (authed) $("who").textContent = "token " + token();
+        log.push(authed ? "feed" : "gate");
+      };
+
+      $("form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        if ($("pass").value !== PASSWORD) {
+          $("error").textContent = "Wrong password";
+          $("error").classList.add("on");
+          log.push("denied");
+          return;
+        }
+        localStorage.setItem(TOKEN_KEY, "fixture-token");
+        document.cookie = COOKIE + "=yes; path=/";
+        log.push("granted");
+        render();
+      });
+
+      render();
+    </script>
+  </body>
+</html>

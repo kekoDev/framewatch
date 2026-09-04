@@ -1,0 +1,21 @@
+<!doctype html>
+<!-- Fits its viewport at first paint and overflows 400ms later: the responsive
+     bug that only exists once the app has rendered. Nothing is wrong with this
+     page unless the capture waited. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Late responsive fixture</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { background: #ffffff; font: 16px/1.4 system-ui, sans-serif; }
+      #late { width: 0; height: 120px; background: #cc2244; }
+    </style>
+  </head>
+  <body>
+    <div id="late"></div>
+    <script>
+      setTimeout(() => { document.getElementById("late").style.width = "1200px"; }, 400);
+    </script>
+  </body>
+</html>

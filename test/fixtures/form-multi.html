@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Two Forms Fixture</title>
+    <style>
+      html { background: #ffffff; }
+      body { margin: 0; font: 14px/1.4 system-ui, sans-serif; color: #111111; }
+      form { width: 420px; padding: 20px; border-bottom: 1px solid #dddddd; }
+      input { display: block; box-sizing: border-box; width: 360px; margin: 0 0 8px; padding: 6px 8px; border: 1px solid #999999; font: inherit; }
+      button { height: 32px; border: 0; background: #1e90ff; color: #ffffff; font: inherit; padding: 0 16px; }
+      .result { display: none; margin: 8px 0 0; padding: 8px; background: #2e7d32; color: #ffffff; }
+      .result.on { display: block; }
+    </style>
+  </head>
+  <body>
+    <!-- No submit button at all: this one can only be submitted by pressing Enter in the field. -->
+    <form id="search">
+      <label for="q">Search</label>
+      <input id="q" name="q" type="search" />
+      <div class="result" id="search-result"></div>
+    </form>
+
+    <form id="newsletter">
+      <label for="news-email">Newsletter</label>
+      <input id="news-email" name="email" type="email" />
+      <button id="subscribe" type="submit">Subscribe</button>
+      <div class="result" id="news-result"></div>
+    </form>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+
+      $("search").addEventListener("submit", (event) => {
+        event.preventDefault();
+        $("search-result").textContent = "Searched for: " + $("q").value;
+        $("search-result").classList.add("on");
+      });
+
+      $("newsletter").addEventListener("submit", (event) => {
+        event.preventDefault();
+        $("news-result").textContent = "Subscribed: " + $("news-email").value;
+        $("news-result").classList.add("on");
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Heavy Fixture</title>
+    <style>
+      body { margin: 0; font: 15px/1.5 system-ui; background: linear-gradient(135deg, #0f172a, #1e293b 40%, #334155); color: #e2e8f0; }
+      header { display: flex; gap: 24px; padding: 16px 32px; background: rgba(255, 255, 255, 0.06); }
+      .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 32px; }
+      .card { background: linear-gradient(160deg, #f8fafc, #e2e8f0); color: #0f172a; border-radius: 14px; padding: 18px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); }
+      canvas { width: 100%; height: 150px; border-radius: 8px; display: block; margin-bottom: 12px; }
+    </style>
+  </head>
+  <body>
+    <!--
+      A page that compresses like a real one: gradients, shadows, text and
+      six photo-like panels of deterministic noise. Its screenshot is ~180 KB
+      as PNG, which is what makes the image budget do something.
+    -->
+    <header><b>Keko Food</b><span>Dashboard</span><span>Inventory</span><span>Loyalty</span><span>Settings</span></header>
+    <div class="grid" id="grid"></div>
+    <script>
+      var grid = document.getElementById("grid");
+      var seed = 42;
+      var rand = function () { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+      for (var i = 0; i < 6; i++) {
+        var card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = '<canvas width="360" height="150"></canvas><h3>Order #' + (1000 + i) + '</h3><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Total 45,000 IQD.</p>';
+        grid.appendChild(card);
+        var c = card.querySelector("canvas");
+        var x = c.getContext("2d");
+        var g = x.createLinearGradient(0, 0, 360, 150);
+        g.addColorStop(0, "#f59e0b");
+        g.addColorStop(1, "#ef4444");
+        x.fillStyle = g;
+        x.fillRect(0, 0, 360, 150);
+        var d = x.getImageData(0, 0, 360, 150);
+        for (var p = 0; p < d.data.length; p += 4) {
+          var n = (rand() - 0.5) * 90;
+          d.data[p] += n; d.data[p + 1] += n; d.data[p + 2] += n;
+        }
+        x.putImageData(d, 0, 0);
+      }
+    </script>
+  </body>
+</html>

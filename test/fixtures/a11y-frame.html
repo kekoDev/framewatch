@@ -1,0 +1,16 @@
+<!doctype html>
+<!-- The host page is clean; every violation an audit finds here came out of the
+     iframe. axe only sees them if it was injected into the child frame too. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Accessible host with an inaccessible frame</title>
+    <style>body { background: #ffffff; font: 16px system-ui, sans-serif; color: #111111; }</style>
+  </head>
+  <body>
+    <main>
+      <h1>Embedded widget</h1>
+      <iframe src="a11y-bad.html" title="Embedded widget" width="400" height="200"></iframe>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Formless Fixture</title>
+    <style>
+      html { background: #ffffff; }
+      body { margin: 0; font: 14px/1.4 system-ui, sans-serif; color: #111111; }
+      .panel { width: 420px; padding: 24px; }
+      label { display: block; margin: 0 0 4px; font-weight: 600; }
+      input, textarea { display: block; box-sizing: border-box; width: 360px; margin: 0 0 12px; padding: 6px 8px; border: 1px solid #999999; font: inherit; }
+      textarea { height: 60px; }
+      #save { height: 36px; border: 0; background: #1e90ff; color: #ffffff; font: inherit; padding: 0 20px; }
+      #saved { display: none; margin: 12px 0 0; padding: 8px; background: #2e7d32; color: #ffffff; }
+      #saved.on { display: block; }
+    </style>
+  </head>
+  <body>
+    <!-- No <form> element anywhere: the shape most component frameworks produce. -->
+    <div class="panel">
+      <label for="plain-name">Name</label>
+      <input id="plain-name" name="name" type="text" />
+
+      <label for="plain-note">Note</label>
+      <textarea id="plain-note" name="note"></textarea>
+
+      <button id="save" type="button">Save</button>
+      <div id="saved"></div>
+    </div>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      $("save").addEventListener("click", () => {
+        $("saved").textContent = "Saved " + $("plain-name").value;
+        $("saved").classList.add("on");
+      });
+    </script>
+  </body>
+</html>

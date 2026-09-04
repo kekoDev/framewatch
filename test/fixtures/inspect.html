@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Inspect Fixture</title>
+    <style>
+      /* Every number here is asserted on. Change one and change its test. */
+      html { background: #ffffff; }
+      body { margin: 0; padding: 0; font: 16px/24px Arial, sans-serif; color: #111111; }
+      #panel  { position: absolute; left: 20px; top: 20px; width: 400px; height: 300px; background: #f3f4f6; }
+      #title  { position: absolute; left: 0;    top: 0;    margin: 0; width: 400px; height: 40px;
+                font-size: 24px; line-height: 40px; font-weight: 700; color: #6b7280; }
+      #cta    { position: absolute; left: 20px; top: 60px; padding: 8px 16px; margin: 0; border: 0;
+                font: 14px/20px Arial, sans-serif; font-weight: 400; color: #ffffff; background: #3b82f6;
+                border-radius: 6px; display: inline-block; }
+      #note   { position: absolute; left: 20px; top: 110px; width: 200px; height: 20px; margin: 0;
+                font-size: 13px; line-height: 20px; color: rgba(0, 0, 0, 0.5); }
+      #centred{ position: absolute; left: 150px; top: 150px; width: 100px; height: 30px; background: #10b981; }
+      #row    { position: absolute; left: 20px; top: 200px; display: flex; gap: 12px; }
+      #row span { display: block; width: 40px; height: 40px; background: #d1d5db; border: 1px solid #9ca3af; }
+      #clipper{ position: absolute; left: 20px; top: 260px; width: 60px; height: 20px; overflow: hidden; }
+      #clipped{ width: 200px; height: 20px; background: #f59e0b; }
+      #narrow { position: absolute; left: 100px; top: 260px; width: 60px; height: 20px; white-space: nowrap;
+                overflow: hidden; }
+      #ghost  { position: absolute; left: 300px; top: 260px; width: 40px; height: 20px; opacity: 0; background: #000; }
+      #far    { position: absolute; left: 20px; top: 2000px; width: 100px; height: 20px; }
+    </style>
+  </head>
+  <body>
+    <div id="panel">
+      <h1 id="title">Overview</h1>
+      <button id="cta">Get started</button>
+      <p id="note">Muted helper text</p>
+      <div id="centred"></div>
+      <div id="row"><span></span><span></span><span></span></div>
+      <div id="clipper"><div id="clipped"></div></div>
+      <div id="narrow">This text is far too long for its box</div>
+      <div id="ghost">boo</div>
+    </div>
+    <p id="far">Below the fold</p>
+  </body>
+</html>

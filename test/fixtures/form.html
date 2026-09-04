@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Form Fixture</title>
+    <style>
+      html { background: #ffffff; }
+      body { margin: 0; font: 14px/1.4 system-ui, sans-serif; color: #111111; }
+      form { width: 460px; padding: 24px; }
+      label { display: block; margin: 0 0 4px; font-weight: 600; }
+      input, select, textarea { display: block; box-sizing: border-box; width: 400px; margin: 0 0 4px; padding: 6px 8px; border: 1px solid #999999; font: inherit; }
+      textarea { height: 60px; }
+      input[type="checkbox"], input[type="radio"] { display: inline-block; width: auto; margin: 0 6px 0 0; }
+      .row { margin: 0 0 14px; }
+      .field-error { display: none; margin: 0 0 12px; color: #c62828; font-size: 13px; }
+      .field-error.on { display: block; }
+      #form-error { display: none; margin: 0 0 16px; padding: 8px; background: #c62828; color: #ffffff; }
+      #form-error.on { display: block; }
+      #done { display: none; margin: 0 0 16px; padding: 16px; background: #2e7d32; color: #ffffff; }
+      #done.on { display: block; }
+      #submit { width: 400px; height: 40px; border: 0; background: #1e90ff; color: #ffffff; font: inherit; }
+      #invisible-row { display: none; }
+    </style>
+  </head>
+  <body>
+    <form id="signup" novalidate>
+      <div id="form-error" role="alert"></div>
+      <div id="done"></div>
+
+      <div class="row">
+        <label for="name">Full name</label>
+        <input id="name" name="name" type="text" maxlength="20" required />
+        <div class="field-error" data-for="name"></div>
+      </div>
+
+      <div class="row">
+        <label for="email">Email address</label>
+        <input id="email" name="email" type="email" required />
+        <div class="field-error" data-for="email"></div>
+      </div>
+
+      <div class="row">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" minlength="8" required />
+        <div class="field-error" data-for="password"></div>
+      </div>
+
+      <div class="row">
+        <label for="age">Age</label>
+        <input id="age" name="age" type="number" min="18" max="120" />
+      </div>
+
+      <div class="row">
+        <label for="website">Website</label>
+        <input id="website" name="website" type="url" />
+      </div>
+
+      <!-- No maxlength attribute: the page itself cuts this one down, which is
+           the truncation a maxlength strategy is meant to surface. -->
+      <div class="row">
+        <label for="code">Access code</label>
+        <input id="code" name="code" type="text" />
+      </div>
+
+      <div class="row">
+        <label for="country">Country</label>
+        <select id="country" name="country">
+          <option value="">Choose a country</option>
+          <option value="us">United States</option>
+          <option value="de">Germany</option>
+          <option value="jp">Japan</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="bio">About you</label>
+        <textarea id="bio" name="bio"></textarea>
+      </div>
+
+      <div class="row">
+        <label><input id="plan-basic" name="plan" type="radio" value="basic" /> Basic plan</label>
+        <label><input id="plan-pro" name="plan" type="radio" value="pro" /> Pro plan</label>
+      </div>
+
+      <div class="row">
+        <label for="terms"><input id="terms" name="terms" type="checkbox" required /> I accept the terms</label>
+        <div class="field-error" data-for="terms"></div>
+      </div>
+
+      <div class="row">
+        <label for="avatar">Avatar</label>
+        <input id="avatar" name="avatar" type="file" />
+      </div>
+
+      <!-- Fields nothing can or should fill. -->
+      <input id="csrf" name="csrf" type="hidden" value="fixture-csrf-token" />
+      <div class="row">
+        <label for="disabled-field">Disabled</label>
+        <input id="disabled-field" name="disabled_field" type="text" disabled />
+      </div>
+      <div class="row">
+        <label for="readonly-field">Read only</label>
+        <input id="readonly-field" name="readonly_field" type="text" readonly value="fixed" />
+      </div>
+      <div class="row" id="invisible-row">
+        <input id="invisible-field" name="invisible_field" type="text" />
+      </div>
+
+      <button id="submit" type="submit">Create account</button>
+    </form>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const form = $("signup");
+
+      // The page's own truncation, in JavaScript, with no maxlength anywhere.
+      $("code").addEventListener("input", (event) => {
+        if (event.target.value.length > 5) event.target.value = event.target.value.slice(0, 5);
+      });
+
+      const fieldError = (name, message) => {
+        const box = form.querySelector('.field-error[data-for="' + name + '"]');
+        box.textContent = message;
+        box.classList.add("on");
+        const field = $(name);
+        if (field) field.setAttribute("aria-invalid", "true");
+      };
+
+      const clearErrors = () => {
+        for (const box of form.querySelectorAll(".field-error")) {
+          box.textContent = "";
+          box.classList.remove("on");
+        }
+        for (const field of form.querySelectorAll("[aria-invalid]")) field.removeAttribute("aria-invalid");
+        $("form-error").classList.remove("on");
+        $("done").classList.remove("on");
+      };
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearErrors();
+
+        const problems = [];
+        if (!$("name").value.trim()) {
+          fieldError("name", "Name is required");
+          problems.push("name");
+        }
+        if (!$("email").value.includes("@")) {
+          fieldError("email", "Enter a valid email address");
+          problems.push("email");
+        }
+        if ($("password").value.length < 8) {
+          fieldError("password", "Password must be at least 8 characters");
+          problems.push("password");
+        }
+        if (!$("terms").checked) {
+          fieldError("terms", "You must accept the terms");
+          problems.push("terms");
+        }
+
+        if (problems.length > 0) {
+          $("form-error").textContent = "Please fix " + problems.length + " problem(s) below.";
+          $("form-error").classList.add("on");
+          console.error("form validation failed: " + problems.join(", "));
+          return;
+        }
+
+        await fetch("/api/ok", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ name: $("name").value, email: $("email").value }),
+        });
+
+        // textContent, never innerHTML: this form escapes what it echoes back.
+        $("done").textContent = "Account created for " + $("name").value;
+        $("done").classList.add("on");
+        console.info("form submitted");
+      });
+    </script>
+  </body>
+</html>

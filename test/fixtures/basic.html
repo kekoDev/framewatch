@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Basic Fixture</title>
+    <style>
+      html, body { margin: 0; padding: 0; background: #ffffff; }
+      #box { position: absolute; left: 40px; top: 30px; width: 200px; height: 100px; background: #1e90ff; }
+      #late { position: absolute; left: 300px; top: 30px; width: 120px; height: 60px; background: #ff4500; }
+    </style>
+  </head>
+  <body>
+    <div id="box"></div>
+    <script>
+      // Element that only appears after a delay — used to test wait_for.
+      setTimeout(() => {
+        const late = document.createElement("div");
+        late.id = "late";
+        document.body.appendChild(late);
+      }, 600);
+      // Canvas turns black after a delay — used to test wait_ms.
+      setTimeout(() => {
+        document.documentElement.style.background = "#000000";
+      }, 600);
+    </script>
+  </body>
+</html>

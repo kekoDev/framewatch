@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Clickable Shapes Fixture</title>
+    <style>
+      html { background: #ffffff; }
+      body { margin: 0; padding: 24px; font: 14px/1.5 system-ui, sans-serif; color: #111111; }
+      /* `cursor` is inherited, so every descendant of these looks clickable
+         too — only the element the style starts at should be a candidate. */
+      .card { display: block; padding: 12px; margin: 0 0 12px; border: 1px solid #cccccc; cursor: pointer; }
+      .card h3 { margin: 0 0 4px; font-size: 14px; }
+      .card p { margin: 0; }
+      /* A pointer wrapper around a real link: the link is the thing clicked. */
+      .wrap { display: inline-block; padding: 8px; cursor: pointer; }
+      /* A pointer-styled span inside a button: part of the button. */
+      .inner { cursor: pointer; }
+      .hidden { display: none; }
+      .zero { width: 0; height: 0; padding: 0; border: 0; overflow: hidden; }
+      li { list-style: none; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h3>A card that is its own button</h3>
+      <p>Nothing inside it is a control of its own.</p>
+    </div>
+
+    <div class="wrap"><a href="basic.html">A link inside a pointer wrapper</a></div>
+
+    <button id="outer" type="button"><span class="inner">A span inside a button</span></button>
+
+    <div id="by-role" role="button" tabindex="0">Marked as a button</div>
+    <div id="by-handler" onclick="void 0">Wired with an onclick attribute</div>
+
+    <!-- No ids anywhere: the only way to address these is a generated path,
+         and both of them generate the same one. -->
+    <ul id="rows">
+      <li><button type="button">First row</button></li>
+      <li><button type="button">Second row</button></li>
+    </ul>
+
+    <button id="invisible" class="hidden" type="button">Never shown</button>
+    <button id="sizeless" class="zero" type="button"></button>
+
+    <a id="download" href="basic.html" download="report.html">Download the report</a>
+    <a id="js-href" href="javascript:void(0)">A javascript: link</a>
+  </body>
+</html>

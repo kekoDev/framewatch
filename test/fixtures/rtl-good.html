@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>RTL — nothing to complain about</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; font: 16px/1.5 system-ui, sans-serif; width: 1280px; }
+
+      /* Everything on this page is written with logical properties, so every
+         element mirrors on its own and the audit must find nothing. It is the
+         control: a tool that reports faults here reports faults everywhere. */
+
+      .bar {
+        display: flex;
+        gap: 12px;
+        padding-inline: 24px;
+        padding-block: 12px;
+        background: #eef3ff;
+      }
+
+      .card {
+        margin-inline-start: 40px;
+        margin-top: 24px;
+        padding-inline-start: 32px;
+        padding-inline-end: 12px;
+        width: 480px;
+        text-align: start;
+        background: #f7f7f7;
+      }
+
+      .pinned {
+        position: absolute;
+        inset-inline-start: 40px;
+        top: 220px;
+        width: 220px;
+        height: 60px;
+        background: #e9ffe9;
+      }
+
+      /* A directional icon that flips itself — the correct pattern. */
+      .icon-arrow {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        background: #ddd;
+      }
+      [dir="rtl"] .icon-arrow { transform: scaleX(-1); }
+    </style>
+  </head>
+  <body>
+    <nav class="bar">
+      <span id="nav-home">Home</span>
+      <span id="nav-products">Products</span>
+      <span id="nav-about">About us</span>
+    </nav>
+
+    <div class="card" id="card-one">
+      <h2 id="card-title">A card with logical padding</h2>
+      <p id="card-body">Everything on this page uses logical properties, so it mirrors correctly.</p>
+    </div>
+
+    <div class="pinned" id="pinned-box">Pinned with inset-inline-start</div>
+
+    <span class="icon-arrow" id="arrow" aria-label="Next"></span>
+  </body>
+</html>

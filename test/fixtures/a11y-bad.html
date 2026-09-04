@@ -1,0 +1,19 @@
+<!doctype html>
+<!-- Deliberately broken: every violation here is one axe-core names explicitly. -->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Inaccessible fixture</title>
+    <style>
+      body { background: #ffffff; font: 16px system-ui, sans-serif; }
+      /* Contrast ratio well under 4.5:1 — the wcag2aa colour-contrast rule. */
+      .faint { color: #cccccc; background: #ffffff; }
+    </style>
+  </head>
+  <body>
+    <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" width="8" height="8" />
+    <input type="text" />
+    <button type="button"></button>
+    <p class="faint">Almost invisible text.</p>
+  </body>
+</html>

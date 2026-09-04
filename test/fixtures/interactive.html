@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Interactive Fixture</title>
+    <style>
+      html { background: #ffffff; }
+      body { margin: 0; padding: 0; height: 1800px; font: 13px monospace; }
+      /* Every target is a fixed-size solid block so tests can assert on pixels
+         and on change-region bounding boxes, not just on the event log. */
+      #btn    { position: absolute; left:  20px; top:  20px; width: 120px; height: 40px; background: #1e90ff; border: 0; }
+      #btn.on { background: #00a000; }
+      #hover  { position: absolute; left: 220px; top:  20px; width: 120px; height: 40px; background: #cccccc; }
+      #hover.on { background: #800080; }
+      #text   { position: absolute; left:  20px; top:  80px; width: 160px; height: 24px; }
+      #echo   { position: absolute; left: 220px; top:  80px; width: 160px; height: 24px; background: #eeeeee; }
+      #sel    { position: absolute; left:  20px; top: 120px; width: 120px; }
+      #touch  { position: absolute; left: 220px; top: 120px; width: 120px; height: 40px; background: #cccccc; }
+      #touch.on { background: #ff8c00; }
+      #link   { position: absolute; left:  20px; top: 170px; }
+      /* Revealed by the button click — far enough from #btn to be its own change region. */
+      #panel  { position: absolute; left:  20px; top: 210px; width: 200px; height: 60px; background: #8b0000; display: none; }
+      /* Only reachable by scrolling: proves a scroll actually moved the page. */
+      #deep   { position: absolute; left:   0px; top: 1500px; width: 100%; height: 200px; background: #006400; }
+      /* Its own scroll container, for scrolling an element instead of the page. */
+      #box    { position: absolute; left: 220px; top: 210px; width: 140px; height: 60px; overflow: auto; background: #f0f0f0; }
+      #box .tall { height: 600px; background: linear-gradient(#ffffff, #333333); }
+    </style>
+  </head>
+  <body>
+    <button id="btn">click me</button>
+    <div id="hover"></div>
+    <input id="text" />
+    <div id="echo"></div>
+    <select id="sel">
+      <option value="a">A</option>
+      <option value="b">B</option>
+    </select>
+    <div id="touch"></div>
+    <a id="link" href="recorder-target.html">go</a>
+    <div id="panel"></div>
+    <div id="box"><div class="tall"></div></div>
+    <div id="deep"></div>
+    <script>
+      // Every interaction appends to window.__events, so engine tests can assert
+      // on what the page actually received rather than on Playwright's return value.
+      const log = (window.__events = []);
+      const $ = (id) => document.getElementById(id);
+
+      $("btn").addEventListener("click", () => {
+        $("btn").classList.add("on");
+        $("panel").style.display = "block";
+        log.push("click");
+      });
+
+      $("hover").addEventListener("mouseenter", () => {
+        $("hover").classList.add("on");
+        log.push("hover");
+      });
+
+      $("text").addEventListener("input", () => {
+        $("echo").textContent = $("text").value;
+        log.push("input:" + $("text").value);
+      });
+
+      $("sel").addEventListener("change", (e) => log.push("change:" + e.target.value));
+
+      $("touch").addEventListener("touchstart", () => {
+        $("touch").classList.add("on");
+        log.push("touchstart");
+      }, { passive: true });
+
+      addEventListener("touchstart", (e) => log.push("down:" + Math.round(e.touches[0].clientX) + "," + Math.round(e.touches[0].clientY)), { passive: true });
+      addEventListener("touchmove", (e) => log.push("move:" + Math.round(e.touches[0].clientX) + "," + Math.round(e.touches[0].clientY)), { passive: true });
+      addEventListener("touchend", () => log.push("up"), { passive: true });
+
+      // Key presses are logged with their modifiers so `key` steps can be
+      // asserted on: "Enter" -> key:Enter, "Control+a" -> key:Control+a.
+      addEventListener("keydown", (e) => {
+        const mods = ["Control", "Shift", "Alt", "Meta"].filter(
+          (m) => e.getModifierState(m) && e.key !== m,
+        );
+        log.push("key:" + mods.concat(e.key).join("+"));
+      });
+
+      // Tab moves focus here, so a "\t" inside a type value is observable.
+      $("echo").tabIndex = 0;
+      $("echo").addEventListener("focus", () => log.push("focus:echo"));
+
+      addEventListener("scroll", () => log.push("scroll:" + Math.round(scrollY)));
+      $("box").addEventListener("scroll", () => log.push("boxscroll:" + Math.round($("box").scrollTop)));
+    </script>
+  </body>
+</html>

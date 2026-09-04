@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Share cards — one page, every kind of og:image there is</title>
+    <meta name="description" content="A page whose share image is chosen by the query string, so one fixture covers every size the audit has an opinion about." />
+    <link rel="canonical" href="{{BASE}}/seo-og.html" />
+    <meta property="og:title" content="Share cards" />
+    <meta property="og:description" content="The share image is whatever ?card= asks for." />
+    <meta property="og:type" content="website" />
+    <script>
+      // og:image is written at runtime so one fixture can stand in for every
+      // share image the audit has an opinion about: the right size, a thumbnail,
+      // one too small to render, one that 404s, and one left relative.
+      var SOURCES = {
+        good: "/api/image?w=1200&h=630",
+        thumb: "/api/image?w=600&h=315",
+        small: "/api/image?w=100&h=100",
+        broken: "/api/image?status=404",
+        relative: "/api/image?w=1200&h=630",
+      };
+      var card = new URLSearchParams(location.search).get("card") || "good";
+      var src = SOURCES[card] || SOURCES.good;
+      var meta = document.createElement("meta");
+      meta.setAttribute("property", "og:image");
+      meta.setAttribute("content", card === "relative" ? src : new URL(src, location.origin).href);
+      document.head.appendChild(meta);
+    </script>
+  </head>
+  <body>
+    <h1>Share cards</h1>
+    <p>The picture that shows up when this link is posted somewhere is fetched and measured, not taken on trust.</p>
+  </body>
+</html>

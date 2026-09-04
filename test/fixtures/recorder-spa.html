@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch SPA Navigation Fixture</title>
+    <style>html, body { margin: 0; background: #ffffff; }</style>
+  </head>
+  <body>
+    <script>
+      // The scroll-spy / router pattern: a same-document navigation on every
+      // animation frame. Each one makes Playwright emit `framenavigated`.
+      let n = 0;
+      function step() {
+        history.replaceState(null, "", "#section-" + n++);
+        requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    </script>
+  </body>
+</html>

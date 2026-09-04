@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Splash Fixture</title>
+    <style>
+      html, body { margin: 0; padding: 0; background: #ffffff; }
+      /* Logo box: invisible at first, fades in between 300ms and 700ms. */
+      #logo { position: absolute; left: 100px; top: 60px; width: 200px; height: 120px; background: #1e3a8a; opacity: 0; }
+      /* Subtitle bar: appears at 1200ms, then the page is static. */
+      #subtitle { position: absolute; left: 100px; top: 200px; width: 200px; height: 40px; background: #444444; display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="logo"></div>
+    <div id="subtitle"></div>
+    <script>
+      // Deterministic JS-timed animation (no CSS transitions), so every run
+      // produces the same sequence of states at the same times:
+      //   0–300ms   blank white page
+      //   300–700ms logo opacity steps 0 → 1 in 8 steps of 50ms
+      //   1200ms    subtitle bar appears
+      //   then      static
+      const logo = document.getElementById("logo");
+      const STEPS = 8;
+      for (let i = 1; i <= STEPS; i++) {
+        setTimeout(() => { logo.style.opacity = String(i / STEPS); }, 300 + (i - 1) * 50);
+      }
+      setTimeout(() => { document.getElementById("subtitle").style.display = "block"; }, 1200);
+    </script>
+  </body>
+</html>

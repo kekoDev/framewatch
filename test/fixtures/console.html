@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>FrameWatch Console Fixture</title>
+    <style>html, body { margin: 0; background: #ffffff; }</style>
+  </head>
+  <body>
+    <div id="box" style="width:200px;height:100px;background:#1e90ff"></div>
+    <script>
+      // Deterministic console output at known times, so a test can assert which
+      // frame each entry lands between.
+      console.log("fixture log line");
+      console.info("fixture info line");
+      setTimeout(() => {
+        console.warn("fixture warn line");
+        document.getElementById("box").style.background = "#00a000";
+      }, 300);
+      setTimeout(() => {
+        console.error("fixture error line");
+        document.getElementById("box").style.background = "#c00000";
+      }, 700);
+      // An uncaught exception and an unhandled rejection: neither is a console
+      // API call, so both only reach us through Playwright's `pageerror`.
+      setTimeout(() => { throw new Error("fixture uncaught boom"); }, 1000);
+      setTimeout(() => { Promise.reject(new Error("fixture unhandled rejection")); }, 1100);
+      // Objects and multi-line text: the collector must flatten these to one line each.
+      setTimeout(() => {
+        console.log({ shape: "object", nested: { deep: 1 } });
+        console.log("first line\nsecond line");
+      }, 1300);
+    </script>
+  </body>
+</html>
