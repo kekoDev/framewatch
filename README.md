@@ -44,19 +44,33 @@ That is the whole setup. The first tool call downloads Chromium if Playwright ha
 
 ### Other MCP clients
 
-Any client that speaks MCP over stdio can run FrameWatch. For Cursor, Windsurf, Claude Desktop or Zed, add this to the client's MCP configuration:
+FrameWatch is a standard MCP server over stdio, so every agent that can run one takes the same command: `npx -y framewatch-mcp-server`. Where it goes:
+
+| Agent | Where | Shape |
+| --- | --- | --- |
+| Claude Code | `claude mcp add framewatch -- npx -y framewatch-mcp-server` | one command; add `--scope user` for every project |
+| Cursor | `.cursor/mcp.json` (project) or `~/.cursor/mcp.json` | `mcpServers` |
+| Windsurf | `~/.codeium/windsurf/mcp_config.json` | `mcpServers` |
+| VS Code (Copilot agent mode) | `.vscode/mcp.json` | `servers`, with `"type": "stdio"` |
+| Codex CLI | `~/.codex/config.toml` | `[mcp_servers.framewatch]` |
+| Gemini CLI | `~/.gemini/settings.json` | `mcpServers` |
+| Claude Desktop | `claude_desktop_config.json` | `mcpServers` |
+| Cline | `cline_mcp_settings.json` via MCP Servers, Configure | `mcpServers` |
+| Continue | `~/.continue/config.yaml` | `mcpServers:` list |
+| Zed | `settings.json` | `context_servers`, `"source": "custom"` |
+| JetBrains AI Assistant | Settings, Tools, AI Assistant, MCP, Add | `mcpServers` |
+
+The `mcpServers` shape most of them share:
 
 ```json
 {
   "mcpServers": {
-    "framewatch": {
-      "command": "npx",
-      "args": ["-y", "framewatch-mcp-server"],
-      "env": { "MAX_MCP_OUTPUT_TOKENS": "100000" }
-    }
+    "framewatch": { "command": "npx", "args": ["-y", "framewatch-mcp-server"] }
   }
 }
 ```
+
+The `MAX_MCP_OUTPUT_TOKENS` cap is specific to Claude Code; other clients have their own limits or none. The exact snippet for each agent, ready to paste, is on [framewatch.keko.dev](https://framewatch.keko.dev/#install).
 
 ### From a checkout
 
