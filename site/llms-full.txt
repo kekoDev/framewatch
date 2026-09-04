@@ -13,7 +13,7 @@ FrameWatch is an [MCP](https://modelcontextprotocol.io) server. Once registered,
 **1. Register it with Claude Code** (one command, no install step):
 
 ```bash
-claude mcp add framewatch npx framewatch-mcp-server
+claude mcp add framewatch -- npx -y framewatch-mcp-server@latest
 ```
 
 **2. Let it see full results.** Claude Code caps a tool result at 25,000 tokens and counts images toward it, which holds about two screenshots of a real page. Raise it once, in the shell you start Claude Code from:
@@ -44,13 +44,15 @@ It runs `framewatch_save_auth`, which writes `.framewatch/auth.json`. From then 
 
 That is the whole setup. The first tool call downloads Chromium if Playwright has not already; if that fails, run `npx playwright install chromium` once.
 
+**Updates are automatic.** The `@latest` in the command makes every new Claude Code session run the newest release. If you registered without it, run `npx clear-npx-cache` once, or remove and re-add the server with the command above. A project that already has a `framewatch` entry needs `claude mcp remove framewatch` first.
+
 ### Other MCP clients
 
-FrameWatch is a standard MCP server over stdio, so every agent that can run one takes the same command: `npx -y framewatch-mcp-server`. Where it goes:
+FrameWatch is a standard MCP server over stdio, so every agent that can run one takes the same command: `npx -y framewatch-mcp-server@latest`. Where it goes:
 
 | Agent | Where | Shape |
 | --- | --- | --- |
-| Claude Code | `claude mcp add framewatch -- npx -y framewatch-mcp-server` | one command; add `--scope user` for every project |
+| Claude Code | `claude mcp add framewatch -- npx -y framewatch-mcp-server@latest` | one command; add `--scope user` for every project |
 | Cursor | `.cursor/mcp.json` (project) or `~/.cursor/mcp.json` | `mcpServers` |
 | Windsurf | `~/.codeium/windsurf/mcp_config.json` | `mcpServers` |
 | VS Code (Copilot agent mode) | `.vscode/mcp.json` | `servers`, with `"type": "stdio"` |
@@ -67,7 +69,7 @@ The `mcpServers` shape most of them share:
 ```json
 {
   "mcpServers": {
-    "framewatch": { "command": "npx", "args": ["-y", "framewatch-mcp-server"] }
+    "framewatch": { "command": "npx", "args": ["-y", "framewatch-mcp-server@latest"] }
   }
 }
 ```

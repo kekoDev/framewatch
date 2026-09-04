@@ -2,7 +2,7 @@
 
 > FrameWatch is an MCP server that gives AI coding agents such as Claude Code a real browser: it opens the web app the agent is building, returns what it sees, measures what was built, clicks through flows, and reports what changed and why.
 
-Install in Claude Code with one command: `claude mcp add framewatch -- npx -y framewatch-mcp-server`. Any other MCP client (Cursor, Windsurf, VS Code Copilot, Codex CLI, Gemini CLI, Claude Desktop, Cline, Continue, Zed, JetBrains) runs the same server with `npx -y framewatch-mcp-server` in its MCP config; exact snippets at https://framewatch.keko.dev/#install. Raise Claude Code's result cap with `export MAX_MCP_OUTPUT_TOKENS=100000` so results keep their images. Package: framewatch-mcp-server on npm. MIT licensed. Node 20.9+; Chromium via Playwright.
+Install in Claude Code with one command: `claude mcp add framewatch -- npx -y framewatch-mcp-server@latest`. Any other MCP client (Cursor, Windsurf, VS Code Copilot, Codex CLI, Gemini CLI, Claude Desktop, Cline, Continue, Zed, JetBrains) runs the same server with `npx -y framewatch-mcp-server@latest` in its MCP config; exact snippets at https://framewatch.keko.dev/#install. Raise Claude Code's result cap with `export MAX_MCP_OUTPUT_TOKENS=100000` so results keep their images. Package: framewatch-mcp-server on npm. MIT licensed. Node 20.9+; Chromium via Playwright.
 
 ## Tools
 

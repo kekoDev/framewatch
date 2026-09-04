@@ -275,7 +275,7 @@
           <h1>Your AI coding agent can't see the page it just built.</h1>
           <p class="lede">FrameWatch gives Claude Code a real browser. It sees the page, measures what it made, clicks through it, and fixes what it got wrong — before it says "done".</p>
           <div class="install">
-            <code id="cmd" tabindex="0">claude mcp add framewatch npx framewatch-mcp-server</code>
+            <code id="cmd" tabindex="0">claude mcp add framewatch -- npx -y framewatch-mcp-server@latest</code>
             <button type="button" id="copy" aria-label="Copy the install command">Copy</button>
           </div>
           <p class="after">That is the whole install. No account, nothing to configure.</p>
@@ -412,7 +412,7 @@ Network:
           <li>
             <div>
               <h3>Register it with Claude Code</h3>
-              <pre><code>claude mcp add framewatch npx framewatch-mcp-server</code></pre>
+              <pre><code>claude mcp add framewatch -- npx -y framewatch-mcp-server@latest</code></pre>
             </div>
           </li>
           <li>
@@ -438,7 +438,8 @@ Network:
             </div>
           </li>
         </ol>
-        <p style="margin-top:28px;margin-bottom:0">Not using Claude Code? <a href="#install">Every other agent takes the same server</a>, in its own config file.</p>
+        <p style="margin-top:28px;margin-bottom:8px">Not using Claude Code? <a href="#install">Every other agent takes the same server</a>, in its own config file.</p>
+        <p style="margin-bottom:0"><strong>Updates are automatic.</strong> The <code>@latest</code> in the command makes every new session run the newest release. If you installed without it, run <code>npx clear-npx-cache</code> once, or re-register with the command above.</p>
       </section>
 
       <section id="install">
@@ -460,14 +461,14 @@ Network:
 
         <div class="panel" role="tabpanel" id="p-claude-code" aria-labelledby="t-claude-code">
           <p class="where">One command in the terminal. Add <code>--scope user</code> to make it available in every project.</p>
-          <pre><code>claude mcp add framewatch -- npx -y framewatch-mcp-server</code></pre>
+          <pre><code>claude mcp add framewatch -- npx -y framewatch-mcp-server@latest</code></pre>
           <p class="note">Then <code>export MAX_MCP_OUTPUT_TOKENS=100000</code> in the shell you start Claude Code from, so captures arrive whole. This cap is specific to Claude Code.</p>
         </div>
         <div class="panel" role="tabpanel" id="p-cursor" aria-labelledby="t-cursor" hidden>
           <p class="where">In <code>.cursor/mcp.json</code> for one project, or <code>~/.cursor/mcp.json</code> for all of them. Or Settings, MCP, Add new server.</p>
           <pre><code>{
   "mcpServers": {
-    "framewatch": { "command": "npx", "args": ["-y", "framewatch-mcp-server"] }
+    "framewatch": { "command": "npx", "args": ["-y", "framewatch-mcp-server@latest"] }
   }
 }</code></pre>
         </div>
@@ -475,7 +476,7 @@ Network:
           <p class="where">In <code>~/.codeium/windsurf/mcp_config.json</code>, or Settings, Cascade, MCP Servers, Add.</p>
           <pre><code>{
   "mcpServers": {
-    "framewatch": { "command": "npx", "args": ["-y", "framewatch-mcp-server"] }
+    "framewatch": { "command": "npx", "args": ["-y", "framewatch-mcp-server@latest"] }
   }
 }</code></pre>
         </div>
@@ -483,7 +484,7 @@ Network:
           <p class="where">In <code>.vscode/mcp.json</code> in the workspace. GitHub Copilot's agent mode picks it up; note the key is <code>servers</code>.</p>
           <pre><code>{
   "servers": {
-    "framewatch": { "type": "stdio", "command": "npx", "args": ["-y", "framewatch-mcp-server"] }
+    "framewatch": { "type": "stdio", "command": "npx", "args": ["-y", "framewatch-mcp-server@latest"] }
   }
 }</code></pre>
         </div>
@@ -491,13 +492,13 @@ Network:
           <p class="where">In <code>~/.codex/config.toml</code>.</p>
           <pre><code>[mcp_servers.framewatch]
 command = "npx"
-args = ["-y", "framewatch-mcp-server"]</code></pre>
+args = ["-y", "framewatch-mcp-server@latest"]</code></pre>
         </div>
         <div class="panel" role="tabpanel" id="p-gemini" aria-labelledby="t-gemini" hidden>
           <p class="where">In <code>~/.gemini/settings.json</code>, or <code>.gemini/settings.json</code> in the project.</p>
           <pre><code>{
   "mcpServers": {
-    "framewatch": { "command": "npx", "args": ["-y", "framewatch-mcp-server"] }
+    "framewatch": { "command": "npx", "args": ["-y", "framewatch-mcp-server@latest"] }
   }
 }</code></pre>
         </div>
@@ -505,7 +506,7 @@ args = ["-y", "framewatch-mcp-server"]</code></pre>
           <p class="where">In <code>~/Library/Application Support/Claude/claude_desktop_config.json</code> on macOS, <code>%APPDATA%\Claude\claude_desktop_config.json</code> on Windows. Restart the app.</p>
           <pre><code>{
   "mcpServers": {
-    "framewatch": { "command": "npx", "args": ["-y", "framewatch-mcp-server"] }
+    "framewatch": { "command": "npx", "args": ["-y", "framewatch-mcp-server@latest"] }
   }
 }</code></pre>
         </div>
@@ -513,7 +514,7 @@ args = ["-y", "framewatch-mcp-server"]</code></pre>
           <p class="where">Cline, MCP Servers, Configure MCP Servers, which opens <code>cline_mcp_settings.json</code>.</p>
           <pre><code>{
   "mcpServers": {
-    "framewatch": { "command": "npx", "args": ["-y", "framewatch-mcp-server"] }
+    "framewatch": { "command": "npx", "args": ["-y", "framewatch-mcp-server@latest"] }
   }
 }</code></pre>
         </div>
@@ -522,13 +523,13 @@ args = ["-y", "framewatch-mcp-server"]</code></pre>
           <pre><code>mcpServers:
   - name: framewatch
     command: npx
-    args: ["-y", "framewatch-mcp-server"]</code></pre>
+    args: ["-y", "framewatch-mcp-server@latest"]</code></pre>
         </div>
         <div class="panel" role="tabpanel" id="p-zed" aria-labelledby="t-zed" hidden>
           <p class="where">In Zed's <code>settings.json</code>.</p>
           <pre><code>{
   "context_servers": {
-    "framewatch": { "source": "custom", "command": "npx", "args": ["-y", "framewatch-mcp-server"], "env": {} }
+    "framewatch": { "source": "custom", "command": "npx", "args": ["-y", "framewatch-mcp-server@latest"], "env": {} }
   }
 }</code></pre>
         </div>
@@ -536,11 +537,11 @@ args = ["-y", "framewatch-mcp-server"]</code></pre>
           <p class="where">Settings, Tools, AI Assistant, Model Context Protocol, Add, then paste this as the JSON configuration.</p>
           <pre><code>{
   "mcpServers": {
-    "framewatch": { "command": "npx", "args": ["-y", "framewatch-mcp-server"] }
+    "framewatch": { "command": "npx", "args": ["-y", "framewatch-mcp-server@latest"] }
   }
 }</code></pre>
         </div>
-        <p class="note" style="margin-top:16px">Every client needs Node 20.9 or newer on the PATH. The first run downloads Chromium through Playwright; if that fails, run <code>npx playwright install chromium</code> once. Any agent not listed that can run a stdio MCP server takes the same <code>npx -y framewatch-mcp-server</code> command.</p>
+        <p class="note" style="margin-top:16px">Every client needs Node 20.9 or newer on the PATH. The first run downloads Chromium through Playwright; if that fails, run <code>npx playwright install chromium</code> once. Any agent not listed that can run a stdio MCP server takes the same <code>npx -y framewatch-mcp-server@latest</code> command.</p>
       </section>
 
       <section id="tools">
