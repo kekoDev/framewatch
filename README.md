@@ -1,5 +1,7 @@
 # FrameWatch MCP Server
 
+**[framewatch.keko.dev](https://framewatch.keko.dev)** · [npm](https://www.npmjs.com/package/framewatch-mcp-server) · MIT
+
 > Give your AI coding agent eyes. FrameWatch opens your web app in a real browser and shows Claude Code what it looks like, what changed, and why.
 
 You ask Claude Code to fix the login page. It edits the code and says "done". Was it? Without FrameWatch, neither of you knows until you open the browser yourself. With it, Claude Code opens the page, sees the result, reads the console, checks the spacing and the colours, clicks the button, and fixes what it got wrong — before it tells you it is done.
