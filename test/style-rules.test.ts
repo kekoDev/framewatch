@@ -294,3 +294,30 @@ describe("formatInspection — translucent text", () => {
     expect(text).toContain("contrast 3.9");
   });
 });
+
+describe("describeAlignment — siblings side by side", () => {
+  const parent = { x: 0, y: 0, width: 600, height: 100 };
+  const previous = { x: 20, y: 40, width: 131, height: 43 };
+
+  it("describes the gap to the left and the vertical offset when the box sits to the right", () => {
+    expect(describeAlignment({ x: 163, y: 43, width: 84, height: 43 }, parent, previous)).toContain(
+      "12px right of previous sibling, 3px lower than it",
+    );
+    expect(describeAlignment({ x: 163, y: 37, width: 84, height: 43 }, parent, previous)).toContain(
+      "12px right of previous sibling, 3px higher than it",
+    );
+  });
+
+  it("says top-aligned when the tops match", () => {
+    expect(describeAlignment({ x: 163, y: 40, width: 84, height: 43 }, parent, previous)).toContain(
+      "12px right of previous sibling, top-aligned with it",
+    );
+  });
+});
+
+describe("formatInspection — transparent border", () => {
+  it("names a fully transparent border colour rather than printing #00000000", () => {
+    const lines = formatInspection(measure({ border: "1px solid rgba(0, 0, 0, 0)" }), 1);
+    expect(lines).toContain("   border: 1px solid transparent; radius 0px");
+  });
+});

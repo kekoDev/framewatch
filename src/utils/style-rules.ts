@@ -139,6 +139,18 @@ export function describeAlignment(box: BoundingBox, parent: BoundingBox, previou
   }
 
   if (previous) {
+    const sideGap = box.x - (previous.x + previous.width);
+    if (sideGap >= -ALIGN_TOLERANCE_PX) {
+      // Side by side (a row of buttons): the gap is horizontal and what can
+      // be off is the vertical alignment.
+      const drop = box.y - previous.y;
+      const vertical =
+        Math.abs(drop) <= ALIGN_TOLERANCE_PX
+          ? "top-aligned with it"
+          : `${Math.round(Math.abs(drop))}px ${drop > 0 ? "lower" : "higher"} than it`;
+      parts.push(`${Math.round(Math.max(0, sideGap))}px right of previous sibling, ${vertical}`);
+      return parts.join("; ");
+    }
     const gap = box.y - (previous.y + previous.height);
     const vertical =
       gap >= 0 ? `${Math.round(gap)}px below previous sibling` : `overlaps previous sibling by ${Math.round(-gap)}px`;
@@ -270,7 +282,8 @@ function describeBorder(border: string): string {
   const width = Number(match[1]);
   if (width === 0 || match[2] === "none") return "none";
   const colour = parseColour(match[3]);
-  return `${match[1]}px ${match[2]} ${colour ? toHex(colour) : match[3]}`;
+  const shown = colour ? (colour.a === 0 ? "transparent" : toHex(colour)) : match[3];
+  return `${match[1]}px ${match[2]} ${shown}`;
 }
 
 /* ── Page inventory ───────────────────────────────────────────────────── */
