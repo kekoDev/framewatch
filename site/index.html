@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FrameWatch — eyes for your AI coding agent</title>
+    <meta name="description" content="An MCP server that gives Claude Code a real browser: it sees the page it built, measures it, clicks through it and fixes what it got wrong. One command to install." />
+    <link rel="canonical" href="https://framewatch.keko.dev/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="FrameWatch" />
+    <meta property="og:title" content="FrameWatch — eyes for your AI coding agent" />
+    <meta property="og:description" content="An MCP server that lets Claude Code see, measure and click through the web app it is building. Install with one command." />
+    <meta property="og:url" content="https://framewatch.keko.dev/" />
+    <meta property="og:image" content="https://framewatch.keko.dev/assets/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FrameWatch — eyes for your AI coding agent" />
+    <meta name="twitter:description" content="An MCP server that lets Claude Code see, measure and click through the web app it is building." />
+    <meta name="twitter:image" content="https://framewatch.keko.dev/assets/og.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "FrameWatch",
+      "alternateName": "framewatch-mcp-server",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "macOS, Linux, Windows",
+      "softwareVersion": "0.2.0",
+      "description": "An MCP server that gives AI coding agents such as Claude Code a real browser: screenshots, change-only recordings, element refs, measurements with WCAG contrast, form, link and accessibility checks, and Vue hot-reload awareness.",
+      "url": "https://framewatch.keko.dev/",
+      "downloadUrl": "https://www.npmjs.com/package/framewatch-mcp-server",
+      "codeRepository": "https://github.com/kekoDev/framewatch",
+      "license": "https://opensource.org/licenses/MIT",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "author": { "@type": "Person", "name": "kekoDev", "url": "https://github.com/kekoDev" },
+      "keywords": "MCP server, Claude Code, Playwright, visual testing, AI coding agent, screenshot, accessibility, Vue"
+    }
+    </script>
+    <style>
+      :root {
+        --ground: #f2f3f5;
+        --paper: #ffffff;
+        --ink: #16181c;
+        --muted: #5c6370;
+        --line: #d9dce1;
+        --accent: #e5194b;
+        --link: #1a56c9;
+        --wash: #fdecf1;
+        --sans: "IBM Plex Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      * { box-sizing: border-box; }
+      html { background: var(--ground); color: var(--ink); }
+      body { margin: 0; font: 400 17px/1.55 var(--sans); }
+      a { color: var(--link); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+      a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+      h1, h2, h3 { font-weight: 600; letter-spacing: -0.015em; margin: 0; }
+      h1 { font-size: clamp(34px, 5vw, 52px); line-height: 1.08; max-width: 14ch; }
+      h2 { font-size: clamp(24px, 3vw, 32px); line-height: 1.15; margin-bottom: 20px; }
+      h3 { font-size: 19px; }
+      p { margin: 0 0 16px; max-width: 62ch; }
+      .wrap { width: min(1120px, 100% - 48px); margin: 0 auto; }
+      code, pre, .mono { font-family: var(--mono); font-size: 14px; }
+
+      /* Top bar: name and the two places the project lives. */
+      .top { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; flex-wrap: wrap; gap: 10px 16px; }
+      .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--ink); text-decoration: none; font-size: 18px; }
+      .brand svg { width: 26px; height: 26px; }
+      .top nav { display: flex; gap: 22px; }
+      .top nav a { color: var(--muted); text-decoration: none; white-space: nowrap; }
+      .top nav a:hover { color: var(--ink); }
+
+      /* Hero: the claim on the left, a real result on the right. */
+      .hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 48px; align-items: start; padding: 40px 0 72px; }
+      .hero .lede { font-size: 20px; color: var(--muted); margin: 22px 0 28px; max-width: 34ch; }
+      .install { display: flex; align-items: stretch; border: 1px solid var(--line); background: var(--paper); border-radius: 8px; overflow: hidden; max-width: 560px; }
+      .install code { flex: 1; min-width: 0; padding: 14px 16px; white-space: nowrap; overflow-x: auto; font-size: 15px; }
+      .install code::before { content: "$ "; color: var(--muted); }
+      .install button { border: 0; border-left: 1px solid var(--line); background: var(--paper); font: 500 14px var(--sans); padding: 0 16px; cursor: pointer; color: var(--ink); }
+      .install button:hover { background: var(--ground); }
+      .after { color: var(--muted); font-size: 15px; margin-top: 12px; }
+
+      .frame { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+      .frame img { display: block; width: 100%; height: auto; }
+      .frame figcaption { border-top: 1px solid var(--line); padding: 14px 18px; font-family: var(--mono); font-size: 13.5px; line-height: 1.6; color: var(--ink); white-space: pre-wrap; word-break: break-word; }
+      .finding { color: var(--accent); }
+      .hero .caption { margin-top: 10px; color: var(--muted); font-size: 14px; }
+
+      section { padding: 56px 0; border-top: 1px solid var(--line); }
+
+      /* Scenes: the prompt a person typed, and what came back. */
+      .scene { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 32px; padding: 28px 0; border-top: 1px dashed var(--line); }
+      .scene:first-of-type { border-top: 0; padding-top: 0; }
+      .prompt { font-size: 21px; line-height: 1.35; font-weight: 500; max-width: 24ch; }
+      .prompt::before { content: "“"; color: var(--accent); }
+      .prompt::after { content: "”"; color: var(--accent); }
+      .scene .why { color: var(--muted); font-size: 15px; margin-top: 14px; }
+      .out { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; font-family: var(--mono); font-size: 13.5px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; overflow-x: auto; margin: 0; }
+      .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+      .pair figure { margin: 0; }
+      .pair figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+      /* Quick start is a real sequence, so it is numbered. */
+      ol.steps { list-style: none; counter-reset: step; padding: 0; margin: 0; display: grid; gap: 22px; max-width: 720px; }
+      ol.steps li { counter-increment: step; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 16px; }
+      ol.steps li::before { content: counter(step); font: 500 15px var(--mono); color: var(--accent); border: 1.5px solid var(--accent); border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; margin-top: 2px; }
+      ol.steps pre { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0 0; overflow-x: auto; }
+      ol.steps .ask { margin: 10px 0 0; padding-left: 14px; border-left: 3px solid var(--line); color: var(--ink); }
+
+      .scroll { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; font-size: 15px; }
+      th, td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+      th { font-weight: 600; color: var(--muted); }
+      td code { font-size: 13.5px; white-space: nowrap; }
+
+      .compare { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+      .compare h3 { margin-bottom: 8px; }
+      .compare p { font-size: 15px; color: var(--muted); }
+
+      footer { padding: 40px 0 56px; color: var(--muted); font-size: 15px; display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+      footer a { color: var(--muted); }
+
+      @media (max-width: 860px) {
+        .hero, .scene { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+        .hero { padding-bottom: 48px; }
+        .compare { grid-template-columns: minmax(0, 1fr); }
+        .top nav { gap: 14px; }
+        h1 { max-width: none; }
+      }
+      @media (max-width: 560px) {
+        .pair { grid-template-columns: minmax(0, 1fr); }
+        body { font-size: 16px; }
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .install button { transition: background 120ms; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="top">
+        <a class="brand" href="/" aria-label="FrameWatch home">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#16181c"/><rect x="7" y="9" width="18" height="14" rx="2" fill="none" stroke="#e5194b" stroke-width="3"/><rect x="5" y="5" width="8" height="7" rx="1.5" fill="#e5194b"/></svg>
+          FrameWatch
+        </a>
+        <nav aria-label="Project links">
+          <a href="#quick-start">Quick start</a>
+          <a href="#tools">Tools</a>
+          <a href="https://github.com/kekoDev/framewatch">GitHub</a>
+          <a href="https://www.npmjs.com/package/framewatch-mcp-server">npm</a>
+        </nav>
+      </header>
+
+      <main>
+        <div class="hero">
+          <div>
+            <h1>Your AI coding agent can't see the page it just built.</h1>
+            <p class="lede">FrameWatch gives Claude Code a real browser. It sees the page, measures what it made, clicks through it, and fixes what it got wrong — before it says "done".</p>
+            <div class="install">
+              <code id="cmd" tabindex="0">claude mcp add framewatch npx framewatch-mcp-server</code>
+              <button type="button" id="copy" aria-label="Copy the install command">Copy</button>
+            </div>
+            <p class="after">That is the whole install. An MCP server, MIT licensed, no account.</p>
+          </div>
+          <div>
+            <figure class="frame" style="margin:0">
+              <img src="/assets/inspect.png" width="800" height="760" alt="A billing settings page with three elements boxed and numbered in red: the Save changes button, the Cancel button and the Current plan label." />
+              <figcaption>1. #save button "Save changes"
+   text: 14px/21px 600 — #ffffff on #4f8ef7 — <span class="finding">contrast 3.21:1 — fails AA for normal text (needs 4.5:1)</span>
+2. #cancel button "Cancel"
+   layout: 12px right of previous sibling, <span class="finding">3px lower than it</span>
+3. .plan div
+   text: <span class="finding">13px</span>/19.5px 400 — #6b7280 on #ffffff — contrast 4.83:1 — passes AA</figcaption>
+            </figure>
+            <p class="caption">Real output from <code>framewatch_inspect</code> on a page with three planted mistakes. All three found, with the numbers.</p>
+          </div>
+        </div>
+
+        <section id="scenes">
+          <h2>What you say, and what comes back</h2>
+          <p>You talk to Claude Code as usual. It picks the tools. Every result below is real, trimmed only for length.</p>
+
+          <div class="scene">
+            <div>
+              <p class="prompt">What's on the billing page? I want to change the cancel button.</p>
+              <p class="why">Instead of guessing a selector from a screenshot, the agent gets every element by name with a ref it can act on.</p>
+            </div>
+            <pre class="out">Snapshot of http://localhost:5173/billing — "Ledger — Team billing" — 31 elements, 8 interactive
+
+- link "Overview" [ref=e5] [cursor=pointer] → "#"
+- link "Billing" [ref=e6] [cursor=pointer] → "#"
+- link "Members" [ref=e7] [cursor=pointer] → "#"
+- link "Settings" [ref=e8] [cursor=pointer] → "#"
+- textbox "Company name on invoices" [ref=e28]: Keko Food LLC
+- textbox "Billing email" [ref=e30]: finance@keko.dev
+- button "Save changes" [ref=e32] [cursor=pointer]
+- button "Cancel" [ref=e33] [cursor=pointer]</pre>
+          </div>
+
+          <div class="scene">
+            <div>
+              <p class="prompt">Test the login with test@example.com and show me what happens.</p>
+              <p class="why">A before and an after frame, the request the click made, what the console said, and a nudge to save the session so it never has to log in by hand again.</p>
+            </div>
+            <div>
+              <div class="pair">
+                <figure><div class="frame"><img src="/assets/login-before.png" width="800" height="760" alt="The login form, filled in, before the click" loading="lazy" /></div><figcaption>Before</figcaption></figure>
+                <figure><div class="frame"><img src="/assets/login-after.png" width="800" height="760" alt="A green Signed in panel after the click" loading="lazy" /></div><figcaption>After — 939ms later</figcaption></figure>
+              </div>
+              <pre class="out">click "#submit" on http://localhost:5173/login — 10.1% of the frame changed
+Context — console: 1 entry; network: 1 request
+Signed in? Save this session with framewatch_save_auth so every later call starts here.
+Changed: 10.1% — region: 20,20 360x240
+Console:
+  [info] auth token stored
+Network:
+  POST http://localhost:5173/api/login → 200 (124ms)</pre>
+            </div>
+          </div>
+
+          <div class="scene">
+            <div>
+              <p class="prompt">I just changed App.vue. Show me the page once it has reloaded.</p>
+              <p class="why">No reload, no sleep, no replayed flow. FrameWatch watches Vite and returns the moment the hot update lands, then measures the result.</p>
+            </div>
+            <pre class="out">Hot update landed after 1158ms: /src/App.vue — Vue 3.5.42 — route /login (login)</pre>
+          </div>
+        </section>
+
+        <section id="quick-start">
+          <h2>Quick start</h2>
+          <ol class="steps">
+            <li>
+              <div>
+                <h3>Register it with Claude Code</h3>
+                <pre><code>claude mcp add framewatch npx framewatch-mcp-server</code></pre>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Let it see full results</h3>
+                <p>Claude Code caps a tool result at 25,000 tokens and counts images toward it, which holds about two screenshots of a real page. Raise it once, in the shell you start Claude Code from, and add the line to your shell profile.</p>
+                <pre><code>export MAX_MCP_OUTPUT_TOKENS=100000</code></pre>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Start your app and ask</h3>
+                <p>Run your dev server as usual, open Claude Code in the project, and talk to it normally. It picks the tools itself.</p>
+                <p class="ask">The header looks wrong on mobile. Check it at phone width and fix it.</p>
+                <p class="ask">Open the settings page and tell me what you see.</p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Sign in once, if your app has a login</h3>
+                <p>Ask Claude Code to log in and save the session. From then on every tool opens pages already signed in, and says so.</p>
+                <p class="ask">Log in at localhost:5173/login with my test account and save the session.</p>
+              </div>
+            </li>
+          </ol>
+          <p style="margin-top:24px">Any other MCP client works too. Cursor, Windsurf, Claude Desktop and Zed take the same command in their MCP settings; the <a href="https://github.com/kekoDev/framewatch#other-mcp-clients">README has the JSON</a>.</p>
+        </section>
+
+        <section id="tools">
+          <h2>Eighteen tools, one browser</h2>
+          <div class="scroll">
+          <table>
+            <thead><tr><th>Tool</th><th>What Claude Code uses it for</th></tr></thead>
+            <tbody>
+              <tr><td><code>framewatch_screenshot</code></td><td>What does this page look like right now?</td></tr>
+              <tr><td><code>framewatch_capture</code></td><td>Record a few seconds and keep only the frames where something changed — animations, loading, a replayed flow.</td></tr>
+              <tr><td><code>framewatch_interact</code></td><td>Click, type, scroll, one action at a time, on a page that stays open between calls.</td></tr>
+              <tr><td><code>framewatch_snapshot</code></td><td>Every element on the page by name, with a ref to act on instead of a guessed selector.</td></tr>
+              <tr><td><code>framewatch_inspect</code></td><td>Box, font, colours with WCAG contrast, spacing, alignment — or an inventory of the whole page's design values.</td></tr>
+              <tr><td><code>framewatch_wait_for</code></td><td>Return the moment Vite's hot update lands, a Vue app mounts, an element appears, or the network goes quiet.</td></tr>
+              <tr><td><code>framewatch_responsive</code></td><td>The same page at phone, tablet and desktop widths, with overflow reported.</td></tr>
+              <tr><td><code>framewatch_accessibility</code></td><td>An axe-core WCAG audit.</td></tr>
+              <tr><td><code>framewatch_compare</code></td><td>Two URLs, or before and after, with every differing pixel overlaid.</td></tr>
+              <tr><td><code>framewatch_form_test</code></td><td>Fill every form with valid, empty, huge, Arabic and hostile input and report what it did.</td></tr>
+              <tr><td><code>framewatch_seo</code></td><td>What a search engine and a link preview make of the page, read from the rendered DOM.</td></tr>
+              <tr><td><code>framewatch_dead_clicks</code></td><td>Click everything that looks clickable and report what did nothing.</td></tr>
+              <tr><td><code>framewatch_links</code></td><td>Where every link goes: broken, redirected, refused, or pointing at no element.</td></tr>
+              <tr><td><code>framewatch_api_mock</code></td><td>Answer the page's API calls yourself — empty, 500, slow, malformed, offline — and record what it does.</td></tr>
+              <tr><td><code>framewatch_rtl</code></td><td>Flip the page for Arabic, Hebrew or Persian and report what failed to mirror.</td></tr>
+              <tr><td><code>framewatch_save_auth</code></td><td>Sign in once. Every later call starts past the login.</td></tr>
+              <tr><td><code>framewatch_start_server</code>, <code>framewatch_stop_server</code></td><td>Bring the dev server up and down.</td></tr>
+            </tbody>
+          </table>
+          </div>
+        </section>
+
+        <section id="why">
+          <h2>How it differs from a browser MCP</h2>
+          <div class="compare">
+            <div>
+              <h3>Only what changed</h3>
+              <p>A browser MCP returns a screenshot per call. FrameWatch records at 10 frames a second and returns the handful where something meaningful happened, each cropped to the region that changed, each with the console output and requests from that moment.</p>
+            </div>
+            <div>
+              <h3>Numbers, not impressions</h3>
+              <p>"Looks fine" is not a check. Inspect returns the box, the font, the rendered colours with a WCAG verdict, the padding and the alignment to the neighbours, so the agent can compare what it built with what it meant.</p>
+            </div>
+            <div>
+              <h3>Images that arrive</h3>
+              <p>Claude Code drops a whole tool result that exceeds its token cap, images included. FrameWatch fits every result to the cap in a fixed order and says what it cut, so the agent always sees something.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <span>FrameWatch is MIT licensed. Built by <a href="https://github.com/kekoDev">kekoDev</a>.</span>
+        <span><a href="https://github.com/kekoDev/framewatch">Source</a> · <a href="https://www.npmjs.com/package/framewatch-mcp-server">npm</a> · <a href="https://github.com/kekoDev/framewatch/issues">Issues</a> · <a href="/llms.txt">llms.txt</a></span>
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        var button = document.getElementById("copy");
+        var command = document.getElementById("cmd").textContent;
+        button.addEventListener("click", function () {
+          navigator.clipboard.writeText(command).then(function () {
+            button.textContent = "Copied";
+            setTimeout(function () { button.textContent = "Copy"; }, 1600);
+          }, function () {
+            button.textContent = "Select and copy";
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

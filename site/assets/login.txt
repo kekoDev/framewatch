@@ -1,0 +1,10 @@
+click "#submit" on http://localhost:5173/login.html — 10.1% of the frame changed — viewport 800x760, images at full size
+Context — console: 1 entry; network: 1 request
+Signed in? Save this session with framewatch_save_auth (same steps, from the login page) so every later call starts here instead of replaying the login.
+Before — Frame 1 @ 0ms [initial]
+After — Frame 2 @ 939ms [interaction]
+Changed: 10.1% — region: 20,20 360x240
+Console:
+  [info] auth token stored
+Network:
+  POST http://localhost:5173/api/login → 200 (124ms)

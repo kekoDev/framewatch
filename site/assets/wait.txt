@@ -1,0 +1,1 @@
+Hot update landed after 1158ms: /src/App.vue — Vue 3.5.42 — route /vue-app.html/login?hmr=1200 (login) — http://localhost:5173/vue-app.html/login?hmr=1200 — viewport 800x760, images at full size

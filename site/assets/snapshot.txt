@@ -1,0 +1,11 @@
+Snapshot of http://localhost:5173/billing — "Ledger — Team billing" — viewport 800x760 — 31 elements, 8 interactive
+Refs: pass one as `ref` to framewatch_interact (to act on it) or framewatch_inspect (to measure it). They stay valid until the page changes — snapshot again after an action that re-rendered. In a framewatch_capture script, target the same element with a selector such as role=button[name="Sign in"].
+
+- link "Overview" [ref=e5] [cursor=pointer] → "#"
+- link "Billing" [ref=e6] [cursor=pointer] → "#"
+- link "Members" [ref=e7] [cursor=pointer] → "#"
+- link "Settings" [ref=e8] [cursor=pointer] → "#"
+- textbox "Company name on invoices" [ref=e28]: Keko Food LLC
+- textbox "Billing email" [ref=e30]: finance@keko.dev
+- button "Save changes" [ref=e32] [cursor=pointer]
+- button "Cancel" [ref=e33] [cursor=pointer]

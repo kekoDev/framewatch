@@ -1,0 +1,24 @@
+# FrameWatch
+
+> FrameWatch is an MCP server that gives AI coding agents such as Claude Code a real browser: it opens the web app the agent is building, returns what it sees, measures what was built, clicks through flows, and reports what changed and why.
+
+Install with one command: `claude mcp add framewatch npx framewatch-mcp-server`. Raise Claude Code's result cap with `export MAX_MCP_OUTPUT_TOKENS=100000` so results keep their images. Package: framewatch-mcp-server on npm. MIT licensed. Node 20.9+; Chromium via Playwright.
+
+## Tools
+
+- framewatch_screenshot: one screenshot of a page or element.
+- framewatch_capture: record a page for a few seconds and return only the frames where something meaningful changed, each with a crop of the change and the console, network, DOM and performance context from that moment; replays a click/type/scroll script.
+- framewatch_interact: one action (click, tap, type, key, scroll, swipe, hover, select, navigate) on a page that stays open between calls; targets by CSS selector or by a ref from framewatch_snapshot.
+- framewatch_snapshot: the page as an accessibility tree with a ref on every element (e8), so the agent acts by ref instead of guessing selectors.
+- framewatch_inspect: box, font, colours with WCAG contrast, padding, margin, gap, border, radius, visibility and alignment of chosen elements; or a design inventory of the whole page.
+- framewatch_wait_for: wait for Vite's hot update after a save, a mounted Vue app, a selector, or network idle, then screenshot.
+- framewatch_responsive, framewatch_accessibility (axe-core), framewatch_compare, framewatch_form_test, framewatch_seo, framewatch_dead_clicks, framewatch_links, framewatch_api_mock, framewatch_rtl.
+- framewatch_save_auth: sign in once; every later call starts signed in.
+- framewatch_start_server / framewatch_stop_server: bring the dev server up and down.
+
+## Links
+
+- [README with every tool's parameters and real output](https://github.com/kekoDev/framewatch#readme)
+- [Full documentation as plain text](https://framewatch.keko.dev/llms-full.txt)
+- [npm package](https://www.npmjs.com/package/framewatch-mcp-server)
+- [Source](https://github.com/kekoDev/framewatch)

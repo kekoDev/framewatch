@@ -1,0 +1,19 @@
+Inspected 3 of 3 targets on http://localhost:5173/billing — viewport 800x760, images at full size
+1. #save button "Save changes" — <button#save>
+   box: 89,653 131x43 (viewport px; centre 155,675) — visible, fully in viewport
+   text: 14px/21px -apple-system 600 — #ffffff on #4f8ef7 — contrast 3.21:1 — fails AA for normal text (needs 4.5:1)
+   spacing: padding 10 18; margin 0
+   border: 1px solid transparent; radius 8px
+   layout: block; left edge flush with parent
+2. #cancel button "Cancel" — <button#cancel>
+   box: 232,656 84x43 (viewport px; centre 274,678) — visible, fully in viewport
+   text: 14px/21px -apple-system 600 — #1c1f26 on #ffffff — contrast 16.49:1 — passes AAA for normal text
+   spacing: padding 10 18; margin 3 0 0 0
+   border: 1px solid #e5e7eb; radius 8px
+   layout: block; 143px from parent's left, 395px from parent's right; 12px right of previous sibling, 3px lower than it
+3. .plan div — <div.plan>
+   box: 89,195 101x20 (viewport px; centre 140,205) — visible, fully in viewport
+   text: 13px/19.5px -apple-system 400 — #6b7280 on #ffffff — contrast 4.83:1 — passes AA for normal text
+   spacing: padding 0; margin 0
+   border: none; radius 0px
+   layout: block; fills parent's width
