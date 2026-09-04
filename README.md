@@ -1,10 +1,78 @@
 # FrameWatch MCP Server
 
-> An MCP server that gives AI coding agents visual eyes — smart frame capture, diffing, and interaction replay for web apps.
+> Give your AI coding agent eyes. FrameWatch opens your web app in a real browser and shows Claude Code what it looks like, what changed, and why.
 
-An AI coding agent can write a CSS transition but not watch it run. It can read the DOM but not see that the modal opened behind the header. FrameWatch closes that gap: it launches a real (headless Chromium) browser and returns what it sees as images an MCP client such as Claude Code looks at natively — alongside the console output, network requests, DOM mutations and paint timings from the same moment.
+You ask Claude Code to fix the login page. It edits the code and says "done". Was it? Without FrameWatch, neither of you knows until you open the browser yourself. With it, Claude Code opens the page, sees the result, reads the console, checks the spacing and the colours, clicks the button, and fixes what it got wrong — before it tells you it is done.
 
-The problem with screenshots as a debugging tool is volume. A five-second recording at 10fps is fifty near-identical images, and fifty images is a flooded context window. So FrameWatch records everything and returns almost none of it: only the frames where something meaningful actually changed, each cropped to the region that changed, each carrying the context that explains why.
+FrameWatch is an [MCP](https://modelcontextprotocol.io) server. Once registered, Claude Code gets 18 tools it calls on its own: screenshots, recordings that keep only the frames where something changed, a way to name and click every element on a page, measurements of how each element is built, form and link and accessibility checks, and a Vue-aware wait that returns the moment your dev server has hot-reloaded your edit.
+
+## Quick start
+
+**1. Register it with Claude Code** (one command, no install step):
+
+```bash
+claude mcp add framewatch npx framewatch-mcp-server
+```
+
+**2. Let it see full results.** Claude Code caps a tool result at 25,000 tokens and counts images toward it, which holds about two screenshots of a real page. Raise it once, in the shell you start Claude Code from:
+
+```bash
+export MAX_MCP_OUTPUT_TOKENS=100000
+```
+
+Add that line to your `~/.zshrc` or `~/.bashrc` to make it permanent.
+
+**3. Start your app and ask.** Run your dev server as usual, open Claude Code in the project, and talk to it normally:
+
+> Open http://localhost:5173 and tell me what you see.
+
+> The header looks wrong on mobile. Check it at phone width and fix it.
+
+> Test the login flow with test@example.com / password123 and show me what happens.
+
+> I just changed the button styles — show me the page after the hot reload and check the contrast.
+
+Claude Code picks the tools itself. You never call them by name, though you can: "use framewatch_dead_clicks on the settings page" works too.
+
+**4. Sign in once, if your app has a login.** Ask Claude Code to log in and save the session:
+
+> Log in at http://localhost:5173/login with my test account and save the session.
+
+It runs `framewatch_save_auth`, which writes `.framewatch/auth.json`. From then on every tool opens pages already signed in, and says so.
+
+That is the whole setup. The first tool call downloads Chromium if Playwright has not already; if that fails, run `npx playwright install chromium` once.
+
+### Other MCP clients
+
+Any client that speaks MCP over stdio can run FrameWatch. For Cursor, Windsurf, Claude Desktop or Zed, add this to the client's MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "framewatch": {
+      "command": "npx",
+      "args": ["-y", "framewatch-mcp-server"],
+      "env": { "MAX_MCP_OUTPUT_TOKENS": "100000" }
+    }
+  }
+}
+```
+
+### From a checkout
+
+```bash
+git clone https://github.com/kekoDev/framewatch.git
+cd framewatch && npm install && npm run build
+claude mcp add framewatch node "$PWD/dist/index.js"
+```
+
+### Requirements
+
+- **Node 20.9 or newer.**
+- **Chromium**, fetched by Playwright on install. If a tool ever reports the browser is missing, it prints the one command that fixes it.
+- Nothing listens on a port and nothing phones home: FrameWatch only ever talks to the URLs it is given.
+
+## What Claude Code can do with it
 
 | Tool | Use it for |
 | --- | --- |
@@ -26,25 +94,9 @@ The problem with screenshots as a debugging tool is volume. A five-second record
 | [`framewatch_save_auth`](#framewatch_save_auth) | Sign in once, so every other tool starts past the login. |
 | [`framewatch_start_server`](#framewatch_start_server--framewatch_stop_server) / [`framewatch_stop_server`](#framewatch_start_server--framewatch_stop_server) | Get the dev server up so there is something to point at. |
 
-## Install
+Why not just screenshots? Volume. A five-second recording at 10fps is fifty near-identical images, and fifty images is a flooded context window. FrameWatch records everything and returns almost none of it: only the frames where something meaningful changed, each cropped to the region that changed, each carrying the console output, network requests and DOM changes from the same moment — the context that explains why.
 
-```bash
-# Run directly
-npx framewatch-mcp-server
-
-# Register with Claude Code
-claude mcp add framewatch npx framewatch-mcp-server
-```
-
-From a checkout:
-
-```bash
-npm install
-npm run build
-claude mcp add framewatch node /absolute/path/to/framewatch/dist/index.js
-```
-
-### Result size and `MAX_MCP_OUTPUT_TOKENS`
+## Why `MAX_MCP_OUTPUT_TOKENS` matters
 
 Claude Code caps one MCP tool result at 25,000 tokens by default and counts base64 image data toward it. A result over the cap is written to a file and replaced with a reference, so the model sees **no images at all**. A single screenshot of a real page is 180 KB of PNG, which is over on its own.
 
@@ -54,22 +106,7 @@ FrameWatch never lets a result cross that line. Every image goes out in the chea
 Image budget: 4 of 9 images kept — 5 crops dropped, frames at 640px — to fit MAX_MCP_OUTPUT_TOKENS=25000 (~52 KB of images per result). Set MAX_MCP_OUTPUT_TOKENS=100000 in the shell that starts Claude Code for full results.
 ```
 
-The default cap holds one or two frames of a real page. For capture-heavy work, raise it once:
-
-```bash
-export MAX_MCP_OUTPUT_TOKENS=100000
-claude
-```
-
-The server reads the same variable and sizes its budget to it.
-
-### Requirements
-
-- **Node 20.9+**.
-- **Chromium**, via Playwright. `npm install` normally fetches it; if it did not, run `npx playwright install chromium` once. Every tool detects a missing browser and answers with that exact command rather than a stack trace.
-- **No network access needed** beyond whatever the pages under test require — FrameWatch only ever talks to the URLs it is given.
-
-FrameWatch speaks stdio only, and the client spawns it: nothing listens on a port, and there is nothing to configure beyond the line above.
+The default cap holds one or two frames of a real page, which is why step 2 of the quick start raises it. The server reads the same variable and sizes its budget to it.
 
 ## Tools
 
