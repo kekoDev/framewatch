@@ -169,6 +169,7 @@ Record a page for a few seconds and return only the frames where something meani
 | `wait_for` | string | — | CSS selector to wait for (visible) before recording starts |
 | `wait_until` | enum | — | A page state to reach before recording starts: `images`, `fonts`, `animations`, `network_idle`, `vue_ready`, `load`. Omit to start at navigation commit, which is what catches a splash screen |
 | `watch_styles` | array (≤ 8) | — | Elements whose computed styles to track: `{ selector, properties, label? }`, up to 8 properties each. Every card then says what changed since the previous card in the page's own numbers — see below |
+| `animation_speed` | number 0.05–10 | `1` | Playback rate for CSS animations and transitions. `0.1` runs them ten times slower, so a 200ms transition yields many frames instead of two; JavaScript timers are unaffected, and the summary says the rate was changed |
 | `wait_for_timeout_ms` | integer ≥ 1 | `10000` | Max wait for `wait_for` |
 | `interactions` | array (≤ 50) | — | Interaction script to replay while recording (see below) |
 | `interaction_timeout_ms` | integer ≥ 1 | `10000` | Max time one step may wait for its target element |
@@ -232,6 +233,10 @@ Styles:
 ```
 
 A selector that matches nothing says `selector matched nothing` on every card, and an element that mounts or unmounts mid-recording reads `appeared — …` or `gone`. Readings are taken on the recorder's own interval, so a card is judged on the reading nearest before its frame. The summary's context line counts what was watched: `styles: 2 elements watched, 21 readings`.
+
+#### Slowing animations down
+
+A 200ms transition recorded at 10 frames a second is two frames. `animation_speed: 0.1` scales the page's animation clock through the devtools protocol, the same control the browser's animation panel uses, so the transition takes two seconds and the recording sees every step of it. It covers CSS animations, CSS transitions and the Web Animations API; a sequence driven by `setTimeout` runs at its own pace. Pair it with `watch_styles` to read the values at each step. The summary carries `Animations at 0.1× speed (CSS animations and transitions; JavaScript timers run as normal)` so nobody mistakes a slowed recording for a slow page.
 
 #### Context layers
 

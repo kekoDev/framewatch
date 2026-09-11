@@ -609,3 +609,9 @@ export const MAX_STYLE_PROPERTIES = 8;
 
 /** Readings kept per recording; at 10fps this is over a minute. */
 export const MAX_STYLE_SAMPLES = 1000;
+
+/* ── Animation speed ──────────────────────────────────────────────────── */
+
+/** Playback rate a capture may ask for: a twentieth of real time up to ten times it. */
+export const MIN_ANIMATION_SPEED = 0.05;
+export const MAX_ANIMATION_SPEED = 10;

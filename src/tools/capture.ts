@@ -12,14 +12,17 @@ import {
   MAX_VIEWPORT_HEIGHT,
   MAX_VIEWPORT_WIDTH,
   MAX_FRAMES_CAP,
+  MAX_ANIMATION_SPEED,
   MAX_INTERACTIONS,
   MAX_STYLE_PROPERTIES,
   MAX_STYLE_WATCHES,
+  MIN_ANIMATION_SPEED,
   MIN_CAPTURE_DURATION_MS,
   NAVIGATION_TIMEOUT_MS,
   PAGE_INFO_TIMEOUT_MS,
   SELECTOR_TIMEOUT_MS,
 } from "../constants.js";
+import { describeAnimationSpeed, setAnimationSpeed } from "../engine/animation.js";
 import { withPage } from "../engine/browser.js";
 import { buildDiffCards } from "../engine/differ.js";
 import { StyleSampler, applyContext, attachLayers, summariseContext, type CapturedContext } from "../engine/layers/index.js";
@@ -159,6 +162,15 @@ export const captureInputShape = {
       "Track computed style values through the recording: each card then says what changed since the previous card " +
         "in the page's own numbers (`logo: opacity 0.3 → 0.7`), which is how an animation is debugged rather than eyeballed",
     ),
+  animation_speed: z
+    .number()
+    .min(MIN_ANIMATION_SPEED)
+    .max(MAX_ANIMATION_SPEED)
+    .default(1)
+    .describe(
+      "Playback rate for the page's CSS animations and transitions: 0.1 runs them ten times slower, so a 200ms " +
+        "transition yields many frames instead of two. JavaScript timers are unaffected. 1 is real time",
+    ),
   storage_state: storageStateField,
 };
 
@@ -211,6 +223,8 @@ export interface CaptureRun {
   login_visible: boolean;
   /** What `wait_until` found, when one was asked for. */
   wait_note?: string;
+  /** The playback rate, when it was not real time. */
+  speed_note?: string;
 }
 
 /**
@@ -242,6 +256,8 @@ export async function runCapture(input: ParsedCaptureInput, hooks: CaptureHooks 
     // Before anything else, including the layers: whatever the caller needs in
     // place for the page's very first request.
     if (hooks.prepare) await hooks.prepare(page, context);
+    // The animation clock has to be scaled before the page's first frame.
+    if (input.animation_speed !== 1) await setAnimationSpeed(page, input.animation_speed);
 
     // Layers go on before the navigation: a script that throws while the page
     // loads, the request that never comes back and first paint all happen
@@ -313,6 +329,7 @@ export async function runCapture(input: ParsedCaptureInput, hooks: CaptureHooks 
     viewport,
     auth,
     login_visible: recording.loginVisible,
+    ...(input.animation_speed !== 1 ? { speed_note: describeAnimationSpeed(input.animation_speed) } : {}),
     ...(recording.waited
       ? {
           wait_note: recording.waited.met
@@ -364,7 +381,12 @@ export async function capturePage(rawInput: CaptureInput): Promise<CallToolResul
     dropped: run.dropped,
     interactions: run.interactions,
     viewport: run.viewport,
-    notes: [...(run.wait_note ? [run.wait_note] : []), ...(summariseContext(run.context, run.cards.length) ?? []), ...authLines(run)],
+    notes: [
+      ...(run.speed_note ? [run.speed_note] : []),
+      ...(run.wait_note ? [run.wait_note] : []),
+      ...(summariseContext(run.context, run.cards.length) ?? []),
+      ...authLines(run),
+    ],
   });
 }
 

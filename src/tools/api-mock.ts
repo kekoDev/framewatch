@@ -150,7 +150,13 @@ export async function mockApi(rawInput: ApiMockInput): Promise<CallToolResult> {
     dropped: run.dropped,
     interactions: run.interactions,
     viewport: run.viewport,
-    notes: [...report, ...(run.wait_note ? [run.wait_note] : []), ...(summariseContext(run.context, run.cards.length) ?? []), ...authLines(run)],
+    notes: [
+      ...report,
+      ...(run.speed_note ? [run.speed_note] : []),
+      ...(run.wait_note ? [run.wait_note] : []),
+      ...(summariseContext(run.context, run.cards.length) ?? []),
+      ...authLines(run),
+    ],
   });
 }
 
