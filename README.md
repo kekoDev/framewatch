@@ -135,10 +135,11 @@ Take a single screenshot of a page (or of one element on it). Returns a PNG imag
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | `url` | string (URL) | — | Page to screenshot, e.g. `http://localhost:3000` |
-| `wait_ms` | integer | `1000` | Wait after page load before capturing |
+| `wait_ms` | integer | `1000` | Wait after page load before capturing. On a Vue app it is a ceiling: the frame is taken as soon as the app is mounted and its router ready |
 | `viewport` | `{ width, height }` | `1280×720` | Viewport size |
 | `selector` | string | — | CSS selector: screenshot only this element |
 | `wait_for` | string | — | CSS selector to wait for (visible) before capturing |
+| `wait_until` | enum | — | A page state to reach first instead of guessing `wait_ms`: `images`, `fonts`, `animations`, `network_idle`, `vue_ready`, `load`. Bounded by `wait_for_timeout_ms`; a state not reached is reported in the summary, not an error |
 | `wait_for_timeout_ms` | integer ≥ 1 | `10000` | Max wait for `wait_for` / `selector` |
 | `storage_state` | string (path) | — | Auth state file from [`framewatch_save_auth`](#framewatch_save_auth) — open the page already signed in |
 
@@ -166,6 +167,7 @@ Record a page for a few seconds and return only the frames where something meani
 | `interval_ms` | integer 16–2000 | `100` | Raw frame capture interval (100 = 10 fps) |
 | `viewport` | `{ width, height }` | `1280×720` | Viewport size |
 | `wait_for` | string | — | CSS selector to wait for (visible) before recording starts |
+| `wait_until` | enum | — | A page state to reach before recording starts: `images`, `fonts`, `animations`, `network_idle`, `vue_ready`, `load`. Omit to start at navigation commit, which is what catches a splash screen |
 | `wait_for_timeout_ms` | integer ≥ 1 | `10000` | Max wait for `wait_for` |
 | `interactions` | array (≤ 50) | — | Interaction script to replay while recording (see below) |
 | `interaction_timeout_ms` | integer ≥ 1 | `10000` | Max time one step may wait for its target element |
@@ -459,7 +461,7 @@ Wait for the open page to reach a state worth looking at, then look. The conditi
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | `url` | string (URL) | — | Open this page first. Omit to wait on the page left open by the other session tools. |
-| `until` | enum | `hot_update` | `hot_update`: Vite applied a hot update or full reload newer than the last tool call on this page. `vue_ready`: a Vue app is mounted and its router has resolved. `selector`: `selector` is visible. `network_idle`: no requests for 500ms. |
+| `until` | enum | `hot_update` | `hot_update`: Vite applied a hot update or full reload newer than the last tool call on this page. `vue_ready`: a Vue app is mounted and its router has resolved. `selector`: `selector` is visible. `network_idle`: no requests for 500ms. `images`: every `<img>` has its pixels. `fonts`: web fonts have swapped in. `animations`: no finite animation is still running. |
 | `selector` | string | — | For `until: selector` |
 | `timeout_ms` | integer | `10000` | Give up after this long |
 | `include_screenshot` | boolean | `true` | Screenshot once the condition holds |
