@@ -13,6 +13,8 @@ import {
   MAX_VIEWPORT_WIDTH,
   MAX_FRAMES_CAP,
   MAX_INTERACTIONS,
+  MAX_STYLE_PROPERTIES,
+  MAX_STYLE_WATCHES,
   MIN_CAPTURE_DURATION_MS,
   NAVIGATION_TIMEOUT_MS,
   PAGE_INFO_TIMEOUT_MS,
@@ -20,7 +22,7 @@ import {
 } from "../constants.js";
 import { withPage } from "../engine/browser.js";
 import { buildDiffCards } from "../engine/differ.js";
-import { applyContext, attachLayers, summariseContext, type CapturedContext } from "../engine/layers/index.js";
+import { StyleSampler, applyContext, attachLayers, summariseContext, type CapturedContext } from "../engine/layers/index.js";
 import {
   CAPTURE_ACTIONS,
   describeInteraction,
@@ -139,6 +141,24 @@ export const captureInputShape = {
     .boolean()
     .default(false)
     .describe("Attach paint timing, largest contentful paint and layout shifts to the frames they were measured at"),
+  watch_styles: z
+    .array(
+      z.object({
+        selector: z.string().min(1).describe("CSS selector of the element to watch (first match)"),
+        properties: z
+          .array(z.string().min(1))
+          .min(1)
+          .max(MAX_STYLE_PROPERTIES)
+          .describe("Computed properties to track, e.g. opacity, transform, background-color, width"),
+        label: z.string().optional().describe("Name for it in the output; defaults to the selector"),
+      }),
+    )
+    .max(MAX_STYLE_WATCHES)
+    .optional()
+    .describe(
+      "Track computed style values through the recording: each card then says what changed since the previous card " +
+        "in the page's own numbers (`logo: opacity 0.3 → 0.7`), which is how an animation is debugged rather than eyeballed",
+    ),
   storage_state: storageStateField,
 };
 
@@ -239,15 +259,29 @@ export async function runCapture(input: ParsedCaptureInput, hooks: CaptureHooks 
         await page.waitForSelector(input.wait_for, { state: "visible", timeout: input.wait_for_timeout_ms });
       }
       const waited = input.wait_until ? await waitUntil(page, input.wait_until, { timeout_ms: input.wait_for_timeout_ms }) : undefined;
-      const result = await recordFrames(
-        page,
-        { duration_ms: input.duration_ms, interval_ms: input.interval_ms },
-        report && ((recorder) => replayScript(page, recorder, interactions, input.interaction_timeout_ms, report)),
-      );
+      // The style sampler runs on the recorder's own interval, from the first
+      // frame to the last, so every card has a reading near it.
+      const sampler = input.watch_styles?.length ? new StyleSampler(page, input.watch_styles, input.interval_ms) : undefined;
+      sampler?.start();
+      let result;
+      try {
+        result = await recordFrames(
+          page,
+          { duration_ms: input.duration_ms, interval_ms: input.interval_ms },
+          report && ((recorder) => replayScript(page, recorder, interactions, input.interaction_timeout_ms, report)),
+        );
+      } finally {
+        sampler?.stop();
+      }
       // Drain the layers before anything else can close the page. `collect`
       // reads only what Node already holds, so a page that froze, navigated
       // away or crashed still yields everything it managed to report.
       const collected = layers.collect(result.started_at);
+      if (sampler) {
+        collected.styles = sampler.samples(result.started_at);
+        collected.style_labels = sampler.labels;
+        if (sampler.dropped > 0) collected.notes.push(`Style readings were capped — ${sampler.dropped} dropped.`);
+      }
       // The page may have died mid-recording (crash, closed browser). Frames
       // already captured are still worth returning, so never let reading the
       // title or url turn a partial recording into an error.

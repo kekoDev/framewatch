@@ -194,5 +194,9 @@ export function formatCardMeta(card: DiffCard): string {
     lines.push(`DOM:\n${card.dom_snapshot}`);
   }
 
+  if (card.style_changes) {
+    lines.push(`Styles:\n${card.style_changes}`);
+  }
+
   return lines.join("\n");
 }

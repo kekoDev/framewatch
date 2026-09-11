@@ -600,3 +600,12 @@ export const BUDGET_JPEG_QUALITY = 78;
 
 /** What to tell the user to set for full results. */
 export const BUDGET_SUGGESTED_TOKENS = 100_000;
+
+/* ── Style watching ───────────────────────────────────────────────────── */
+
+/** Elements one capture may watch, and properties per element. */
+export const MAX_STYLE_WATCHES = 8;
+export const MAX_STYLE_PROPERTIES = 8;
+
+/** Readings kept per recording; at 10fps this is over a minute. */
+export const MAX_STYLE_SAMPLES = 1000;

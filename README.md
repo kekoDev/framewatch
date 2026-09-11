@@ -168,6 +168,7 @@ Record a page for a few seconds and return only the frames where something meani
 | `viewport` | `{ width, height }` | `1280×720` | Viewport size |
 | `wait_for` | string | — | CSS selector to wait for (visible) before recording starts |
 | `wait_until` | enum | — | A page state to reach before recording starts: `images`, `fonts`, `animations`, `network_idle`, `vue_ready`, `load`. Omit to start at navigation commit, which is what catches a splash screen |
+| `watch_styles` | array (≤ 8) | — | Elements whose computed styles to track: `{ selector, properties, label? }`, up to 8 properties each. Every card then says what changed since the previous card in the page's own numbers — see below |
 | `wait_for_timeout_ms` | integer ≥ 1 | `10000` | Max wait for `wait_for` |
 | `interactions` | array (≤ 50) | — | Interaction script to replay while recording (see below) |
 | `interaction_timeout_ms` | integer ≥ 1 | `10000` | Max time one step may wait for its target element |
@@ -202,6 +203,35 @@ Which raw frames become cards:
 The recorder bounds every screenshot, because Chromium blocks them while a navigation is pending or the main thread is busy. A navigation tags the next frame the loop captures rather than requesting an extra screenshot at commit time — that frame reliably shows the new page, and a `history.replaceState` on every animation frame (the usual scroll-spy or router pattern) cannot flood the recording. Fragment-only URL changes are not treated as navigations, and a crashed or closed page ends the recording early with the frames captured so far.
 
 Failures come back as MCP error results, like `framewatch_screenshot`.
+
+#### Watching styles through a recording
+
+A frame diff says the logo changed. `watch_styles` says by how much, in the values the page itself computed:
+
+```json
+{ "url": "http://localhost:5173/", "duration_ms": 2000,
+  "watch_styles": [
+    { "selector": "#logo", "properties": ["opacity", "transform"], "label": "logo" },
+    { "selector": ".subtitle", "properties": ["display"] }
+  ] }
+```
+
+The first card lists the starting values; each later card lists only what moved, as old → new, and says "no change" for an element that held still so it is never mistaken for one that was not watched:
+
+```
+Frame 1 @ 9ms [initial]
+Styles:
+  logo: opacity 0, transform none
+  .subtitle: display none
+
+Frame 3 @ 708ms [animation]
+Changed: 6.0% — region: 80,40 240x160
+Styles:
+  logo: opacity 0.375 → 0.875
+  .subtitle: no change
+```
+
+A selector that matches nothing says `selector matched nothing` on every card, and an element that mounts or unmounts mid-recording reads `appeared — …` or `gone`. Readings are taken on the recorder's own interval, so a card is judged on the reading nearest before its frame. The summary's context line counts what was watched: `styles: 2 elements watched, 21 readings`.
 
 #### Context layers
 

@@ -79,6 +79,8 @@ export interface DiffCard {
   full_frame: string;
   change_region?: ChangeRegion;
   dom_snapshot?: string;
+  /** Watched computed styles: the starting values on the first card, then what changed. */
+  style_changes?: string;
   console_entries?: ConsoleEntry[];
   network_events?: NetworkEvent[];
   performance?: PerformanceInfo;

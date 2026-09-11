@@ -5,12 +5,15 @@ import { ConsoleCollector } from "./console.js";
 import { DomCollector, renderDomChanges, type DomRecord } from "./dom.js";
 import { NetworkCollector } from "./network.js";
 import { PerformanceCollector, summarisePerformance, type PerfSample } from "./performance.js";
+import { renderStyleChanges, sampleForCard, type StyleSample } from "./styles.js";
 
 export { ConsoleCollector, describePageError, normaliseText, toConsoleLevel } from "./console.js";
 export { SessionLayers, layersFor } from "./session.js";
 export { NetworkCollector, shortenUrl } from "./network.js";
 export { DomCollector, renderDomChanges } from "./dom.js";
 export { PerformanceCollector, summarisePerformance } from "./performance.js";
+export { StyleSampler, renderStyleChanges, sampleForCard } from "./styles.js";
+export type { StyleSample, StyleWatch } from "./styles.js";
 export type { ConsoleRecord } from "./console.js";
 export type { NetworkRecord } from "./network.js";
 export type { DomOp, DomRecord, RawDomRecord } from "./dom.js";
@@ -48,6 +51,10 @@ export interface CapturedContext {
   network?: NetworkEvent[];
   dom?: DomRecord[];
   performance?: PerfSample[];
+  /** Readings of the watched styles, when a capture asked for any. */
+  styles?: StyleSample[];
+  /** What was watched, for the summary. */
+  style_labels?: string[];
   /** Anything the user should know about the collection itself (caps hit, layers unavailable). */
   notes: string[];
 }
@@ -172,6 +179,18 @@ export function applyContext(cards: DiffCard[], context: CapturedContext): void 
       if (info !== undefined) card.performance = info;
     });
   }
+  if (context.styles && context.styles.length > 0) {
+    // Each card is judged on the reading nearest before its frame, against
+    // the previous card's reading — the same "since the last card" the other
+    // layers use, expressed as values rather than events.
+    let previous: StyleSample | undefined;
+    for (const card of cards) {
+      const current = sampleForCard(context.styles, card.timestamp_ms);
+      const text = renderStyleChanges(previous, current);
+      if (text !== undefined) card.style_changes = text;
+      previous = current ?? previous;
+    }
+  }
 }
 
 /** Bucket `items` by card (see `applyContext`) and hand each card its own. */
@@ -229,6 +248,14 @@ export function summariseContext(context: CapturedContext, cardCount: number): s
       context.performance.length > 0
         ? `performance: ${count(context.performance.length, "entry", "entries")}`
         : "performance: nothing measured",
+    );
+  }
+
+  if (context.style_labels) {
+    parts.push(
+      context.styles && context.styles.length > 0
+        ? `styles: ${count(context.style_labels.length, "element", "elements")} watched, ${count(context.styles.length, "reading", "readings")}`
+        : `styles: ${count(context.style_labels.length, "element", "elements")} watched, nothing read`,
     );
   }
 
