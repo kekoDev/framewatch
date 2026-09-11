@@ -1,6 +1,6 @@
 {
   "name": "framewatch-mcp-server",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "MCP server for smart visual testing of web apps — frame capture, diffing, and interaction replay",
   "license": "MIT",
   "author": "kekoDev (https://github.com/kekoDev)",
