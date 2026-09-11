@@ -1,8 +1,11 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { DEFAULT_SCREENSHOT_WAIT_MS, DEFAULT_VIEWPORT, NAVIGATION_TIMEOUT_MS, SELECTOR_TIMEOUT_MS } from "../constants.js";
+import { DEFAULT_SCREENSHOT_WAIT_MS, DEFAULT_VIEWPORT, NAVIGATION_TIMEOUT_MS, SELECTOR_TIMEOUT_MS, VUE_READY_TIMEOUT_MS } from "../constants.js";
 import { withPage } from "../engine/browser.js";
+import { waitForVueReady } from "../engine/vue.js";
+import { WAIT_CONDITIONS, describeWait, waitUntil, type WaitResult } from "../engine/wait.js";
+import { describeVue } from "../utils/vue-rules.js";
 import { getDimensions, resizeForOutput, toBase64 } from "../utils/image.js";
 import { loginFormVisible, resolveStorageState, storageStateField, withAuthNote } from "../utils/storage-state.js";
 
@@ -18,7 +21,7 @@ export const screenshotInputShape = {
     .int()
     .min(0)
     .default(DEFAULT_SCREENSHOT_WAIT_MS)
-    .describe("Wait time (ms) after page load before screenshot"),
+    .describe("Wait time (ms) after page load before the screenshot. On a Vue app this is a ceiling: the frame is taken as soon as the app is mounted and its router ready"),
   viewport: z
     .object({
       width: z.number().int().min(1).default(DEFAULT_VIEWPORT.width),
@@ -28,6 +31,14 @@ export const screenshotInputShape = {
     .describe("Viewport size (defaults to 1280x720)"),
   selector: z.string().optional().describe("CSS selector to screenshot a specific element instead of the viewport"),
   wait_for: z.string().optional().describe("CSS selector to wait for (visible) before taking the screenshot"),
+  wait_until: z
+    .enum(WAIT_CONDITIONS)
+    .optional()
+    .describe(
+      "A page state to wait for before the screenshot, instead of guessing `wait_ms`: `images` (every <img> has its pixels), " +
+        "`fonts` (web fonts swapped in), `animations` (no finite animation still running), `network_idle`, `vue_ready`, `load`. " +
+        "Bounded by `wait_for_timeout_ms`; a state that was not reached is reported, not an error",
+    ),
   wait_for_timeout_ms: z
     .number()
     .int()
@@ -65,9 +76,12 @@ export async function takeScreenshot(rawInput: ScreenshotInput): Promise<CallToo
       if (input.wait_for) {
         await page.waitForSelector(input.wait_for, { state: "visible", timeout: input.wait_for_timeout_ms });
       }
-      if (input.wait_ms > 0) {
-        await page.waitForTimeout(input.wait_ms);
-      }
+      // `wait_ms` is a ceiling on a Vue app: the frame is taken once the app is
+      // mounted and its router has resolved. A plain page gets the full wait.
+      const { vue } = await waitForVueReady(page, { detect_ms: input.wait_ms, ready_ms: VUE_READY_TIMEOUT_MS });
+      const waited: WaitResult | undefined = input.wait_until
+        ? await waitUntil(page, input.wait_until, { timeout_ms: input.wait_for_timeout_ms })
+        : undefined;
 
       const png = input.selector
         ? await page.locator(input.selector).first().screenshot({ type: "png", timeout: input.wait_for_timeout_ms })
@@ -80,6 +94,8 @@ export async function takeScreenshot(rawInput: ScreenshotInput): Promise<CallToo
         status: response?.status() ?? null,
         // A login form on the page after restoring a session is the expiry signal.
         loginVisible: auth ? await loginFormVisible(page) : false,
+        vue,
+        waited,
       };
     });
 
@@ -93,6 +109,8 @@ export async function takeScreenshot(rawInput: ScreenshotInput): Promise<CallToo
       `${width}x${height}`,
       `viewport ${viewport.width}x${viewport.height}`,
       input.selector ? `element ${input.selector}` : null,
+      shot.vue ? describeVue(shot.vue) : null,
+      shot.waited ? describeWait(shot.waited) : null,
     ].filter((p): p is string => p !== null);
 
     return withAuthNote(

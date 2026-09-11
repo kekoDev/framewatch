@@ -31,6 +31,7 @@ import {
   type Interaction,
 } from "../engine/interaction.js";
 import { recordFrames, type FrameRecorder } from "../engine/recorder.js";
+import { WAIT_CONDITIONS, describeWait, waitUntil } from "../engine/wait.js";
 import { formatDiffCards, type InteractionReport } from "../utils/format.js";
 import type { DiffCard, Viewport } from "../types.js";
 import { describeAuth, loginFormVisible, resolveStorageState, storageStateField, type ResolvedAuth } from "../utils/storage-state.js";
@@ -95,6 +96,13 @@ export const captureInputShape = {
     .optional()
     .describe("Viewport size (defaults to 1280x720)"),
   wait_for: z.string().optional().describe("CSS selector to wait for (visible) before recording starts"),
+  wait_until: z
+    .enum(WAIT_CONDITIONS)
+    .optional()
+    .describe(
+      "A page state to reach before recording starts: `images`, `fonts`, `animations` (none still running), `network_idle`, " +
+        "`vue_ready`, `load`. Omit to start at navigation commit, which is what catches a splash screen. Bounded by `wait_for_timeout_ms`",
+    ),
   wait_for_timeout_ms: z
     .number()
     .int()
@@ -181,6 +189,8 @@ export interface CaptureRun {
   /** The saved auth that was applied, if any, and whether the page still showed a login form afterwards. */
   auth: ResolvedAuth | null;
   login_visible: boolean;
+  /** What `wait_until` found, when one was asked for. */
+  wait_note?: string;
 }
 
 /**
@@ -228,6 +238,7 @@ export async function runCapture(input: ParsedCaptureInput, hooks: CaptureHooks 
       if (input.wait_for) {
         await page.waitForSelector(input.wait_for, { state: "visible", timeout: input.wait_for_timeout_ms });
       }
+      const waited = input.wait_until ? await waitUntil(page, input.wait_until, { timeout_ms: input.wait_for_timeout_ms }) : undefined;
       const result = await recordFrames(
         page,
         { duration_ms: input.duration_ms, interval_ms: input.interval_ms },
@@ -242,7 +253,7 @@ export async function runCapture(input: ParsedCaptureInput, hooks: CaptureHooks 
       // title or url turn a partial recording into an error.
       // A login form on the page after restoring a session is the expiry signal.
       const loginVisible = auth ? await loginFormVisible(page) : false;
-      return { ...result, context: collected, loginVisible, ...(await describePage(page)) };
+      return { ...result, context: collected, loginVisible, waited, ...(await describePage(page)) };
     } finally {
       layers.detach();
       if (hooks.finish) await hooks.finish(page, context).catch(() => {});
@@ -268,7 +279,18 @@ export async function runCapture(input: ParsedCaptureInput, hooks: CaptureHooks 
     viewport,
     auth,
     login_visible: recording.loginVisible,
+    ...(recording.waited
+      ? {
+          wait_note: recording.waited.met
+            ? `${capitalise(describeWait(recording.waited))} before recording.`
+            : `${capitalise(describeWait(recording.waited))}; recording started anyway.`,
+        }
+      : {}),
   };
+}
+
+function capitalise(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 /**
@@ -308,7 +330,7 @@ export async function capturePage(rawInput: CaptureInput): Promise<CallToolResul
     dropped: run.dropped,
     interactions: run.interactions,
     viewport: run.viewport,
-    notes: [...(summariseContext(run.context, run.cards.length) ?? []), ...authLines(run)],
+    notes: [...(run.wait_note ? [run.wait_note] : []), ...(summariseContext(run.context, run.cards.length) ?? []), ...authLines(run)],
   });
 }
 

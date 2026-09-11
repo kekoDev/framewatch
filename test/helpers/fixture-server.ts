@@ -183,8 +183,22 @@ async function handleApi(
       })
         .png()
         .toBuffer();
-      res.writeHead(200, { "content-type": "image/png", "content-length": String(png.byteLength) });
-      res.end(png);
+      // ?delay=N answers after N ms — an image that is still loading when the
+      // page's load event fires, which is what an images wait has to notice.
+      const delay = Number(params.get("delay") ?? 0);
+      const send = (): void => {
+        res.writeHead(200, { "content-type": "image/png", "content-length": String(png.byteLength) });
+        res.end(png);
+      };
+      if (Number.isFinite(delay) && delay > 0) {
+        const timer = setTimeout(() => {
+          timers.delete(timer);
+          send();
+        }, delay);
+        timers.add(timer);
+      } else {
+        send();
+      }
       return;
     }
     case "/api/products": {

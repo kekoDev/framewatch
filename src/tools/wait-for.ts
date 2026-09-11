@@ -15,6 +15,7 @@ import { withSessionLock } from "../engine/browser.js";
 import { hasViteClient, hmrFor } from "../engine/hmr.js";
 import { takeSnapshot } from "../engine/snapshot.js";
 import { detectVue, waitForVueReady } from "../engine/vue.js";
+import { waitUntil } from "../engine/wait.js";
 import { describeScale } from "../utils/format.js";
 import { resizeForOutput, toBase64 } from "../utils/image.js";
 import { storageStateField, withAuthNote } from "../utils/storage-state.js";
@@ -30,12 +31,13 @@ export const waitForInputShape = {
     .optional()
     .describe("Open this URL first. Omit to wait on the page left open by framewatch_interact / framewatch_snapshot."),
   until: z
-    .enum(["hot_update", "vue_ready", "selector", "network_idle"])
+    .enum(["hot_update", "vue_ready", "selector", "network_idle", "images", "fonts", "animations"])
     .default("hot_update")
     .describe(
       "`hot_update`: Vite applied a hot update (or full reload) newer than the last tool call on this page — " +
         "use it right after saving a file. `vue_ready`: a Vue app is mounted and its router has resolved. " +
-        "`selector`: `selector` is visible. `network_idle`: no requests for 500ms.",
+        "`selector`: `selector` is visible. `network_idle`: no requests for 500ms. `images`: every <img> has its pixels. " +
+        "`fonts`: web fonts have swapped in. `animations`: no finite animation is still running.",
     ),
   selector: z.string().optional().describe("For `until: selector` — the element to wait for"),
   timeout_ms: z
@@ -144,6 +146,18 @@ async function runWaitFor(rawInput: WaitForInput): Promise<CallToolResult> {
           return errorResult(`Wait failed: the network did not go idle within ${input.timeout_ms}ms on ${page.url()}.`);
         }
         headline = `Network idle after ${elapsed()}ms`;
+        vue = await detectVue(page);
+        break;
+      }
+      case "images":
+      case "fonts":
+      case "animations": {
+        const result = await waitUntil(page, input.until, { timeout_ms: input.timeout_ms });
+        if (!result.met) {
+          return errorResult(`Wait failed: ${input.until} not met within ${input.timeout_ms}ms on ${page.url()}${result.detail ? ` — ${result.detail}` : ""}.`);
+        }
+        const what = input.until === "images" ? "Images loaded" : input.until === "fonts" ? "Fonts ready" : "Animations finished";
+        headline = `${what} after ${result.waited_ms}ms${result.detail ? ` (${result.detail})` : ""}`;
         vue = await detectVue(page);
         break;
       }
